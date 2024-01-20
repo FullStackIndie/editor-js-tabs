@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EditorJS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link rel="stylesheet" lang="scss" href="./src/sass/styles.scss">
+</head>
+
+<body style="width: 100%;height:100%">
+  <div class="form-group mb-5">
+    <label class="control-label" for="Content">Content</label>
+    <input type="text" hidden="" id="Content" name="Content" value='' />
+  </div>
+  <div id="editorjs"></div>
+  <button type="button" id="save">Save</button>
+  <button type="button" id="load">Load</button>
+  <button type="button" id="preview-btn">Preview</button>
+  <div id="preview"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+
+  <script async type="module">
+    import * as Main from './src/js/main';
+
+    let saved = false;
+    const editor = Main.initializeEditorJS();
+    const hljs = Main.initializeHighlightJs();
+
+    addEventListeners();
+
+    function previewData()
+    {
+      Main.previewDataAsHtml('preview');
+      document.querySelectorAll('pre code').forEach((code) =>
+      {
+        console.log(`code block ${code}`);
+        hljs.highlightElement(code);
+      });
+    }
+
+    function saveData()
+    {
+      Main.saveData(editor);
+    }
+    function loadData()
+    {
+      Main.loadData(editor);
+    }
+
+    function addEventListeners()
+    {
+      if (saved)
+      {
+        return;
+      } else
+      {
+        addSavedDataEvent();
+        saved = true;
+      }
+    }
+
+    function addSavedDataEvent()
+    {
+      document.getElementById('save').onclick = saveData;
+      document.getElementById('load').onclick = loadData;
+      document.getElementById('preview-btn').onclick = previewData;
+    }
+  </script>
+
+
+</body>
+
+</html>
