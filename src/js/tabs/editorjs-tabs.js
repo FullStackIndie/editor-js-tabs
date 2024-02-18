@@ -1,19 +1,17 @@
 import Sortable from "sortablejs";
 import TabsSettings from "./tabs-settings";
-import TabsRenderer from "./tabs-renderer";
+import TabsHandler from "./tabs-handler";
 import { tabsSvgIcon } from "./tabs-icons";
 import TabsEventHandlers from "./tabs-event-handlers";
-import TabsImageHandler from "./tabs-image";
-import TabsText from "./tabs-text";
+import TabsImageHandler from "./content/tabs-image";
 import { isEmpty } from "lodash-es";
 
 export default class Tabs {
   constructor({ data, api, config }) {
     this.settings = new TabsSettings();
-    this.tabRenderer = new TabsRenderer();
+    this.tabHandler = new TabsHandler();
     this.eventHandler = new TabsEventHandlers(api);
     this.imageHandler = new TabsImageHandler();
-    this.textHandler = new TabsText();
     this.data = data || this.settings.defaultData;
     this.api = api;
     this.config = config || this.settings.defaultConfig;
@@ -32,7 +30,7 @@ export default class Tabs {
     this.wrapper.classList.add("bordered-tab-contents", "cdx-block");
 
     let tabData = isEmpty(this.data) ? this.settings.defaultData : this.data;
-    const renderedPanels = this.tabRenderer.handleTabRendering(tabData);
+    const renderedPanels = this.tabHandler.handleTabRendering(tabData);
 
     if (renderedPanels) {
       this.wrapper.appendChild(renderedPanels.tabs);
@@ -86,6 +84,9 @@ export default class Tabs {
       } else if (content.matches("textarea[data-tab-code]")) {
         let parent = content.parentNode;
         let select = parent.querySelector("select[data-tab-code-lang]");
+        if (select.selectedIndex === -1) {
+          select.selectedIndex = 0;
+        }
         let selectedValue = select.options[select.selectedIndex].value;
         data.type = "code-block";
         data.index = currentIndex++;
@@ -121,21 +122,31 @@ export default class Tabs {
   }
 
   addBlockSettingsEvents(setting, button) {
+    let tabContentParent = document.querySelector(
+      ".tab-content > .show.active"
+    );
+    let tabId = tabContentParent.getAttribute("id");
+    let tabContent = document.getElementById(tabId);
+
     if (setting.name === "tab") {
       button.addEventListener("click", () => {
         this.eventHandler.addAddTabEventsOnClick();
       });
     } else if (setting.name === "image") {
       button.addEventListener("click", () => {
-        this.imageHandler.createImageSetting().click();
+        this.imageHandler.createImageEventButton().click();
       });
     } else if (setting.name === "text") {
       button.addEventListener("click", () => {
-        this.textHandler.renderText();
+        tabContent.appendChild(
+          this.tabHandler.renderTextContent({ content: "Edit" })
+        );
       });
     } else if (setting.name === "code") {
       button.addEventListener("click", () => {
-        this.textHandler.renderCode();
+        tabContent.appendChild(
+          this.tabHandler.renderCodeContent({ lang: "javascript" })
+        );
       });
     }
   }

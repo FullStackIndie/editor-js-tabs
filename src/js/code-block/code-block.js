@@ -1,3 +1,4 @@
+
 export default class CodeBlock {
   /**
    * Allow to press Enter inside the CodeBlock textarea

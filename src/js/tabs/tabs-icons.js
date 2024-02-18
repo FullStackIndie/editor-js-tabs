@@ -1,6 +1,6 @@
 export function moveSvgIcon(attributes = "") {
   return `
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" ${attributes}>
+      <svg class="ce-toolbar__settings-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" ${attributes}>
       <path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M9.40999 7.29999H9.4"></path><path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M14.6 7.29999H14.59"></path><path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M9.30999 12H9.3"></path><path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M14.6 12H14.59"></path><path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M9.40999 16.7H9.4"></path><path stroke="currentColor" stroke-linecap="round" stroke-width="2.6" d="M14.6 16.7H14.59"></path></svg>
     `;
 }
@@ -23,7 +23,7 @@ export function editTabSvgIcon(attributes = "") {
     `;
 }
 
-export function deleteSvgIcon(attributes, classes = "") {
+export function deleteSvgIcon(attributes, classes = "popup-btn delete") {
   return `
 <svg class="${classes}" fill="#000000" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ${attributes}><path d="M20,7H12.309a.5.5,0,0,1-.447-.276L10.276,3.553A1,1,0,0,0,9.382,3H4A1,1,0,0,0,3,4V20a1,1,0,0,0,1,1H20a1,1,0,0,0,1-1V8A1,1,0,0,0,20,7Zm-4.793,8.793a1,1,0,1,1-1.414,1.414L12,15.414l-1.793,1.793a1,1,0,0,1-1.414-1.414L10.586,14,8.793,12.207a1,1,0,0,1,1.414-1.414L12,12.586l1.793-1.793a1,1,0,0,1,1.414,1.414L13.414,14Z"/></svg> 
 `;

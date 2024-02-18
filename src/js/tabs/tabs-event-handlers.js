@@ -1,9 +1,10 @@
-import TabsRenderer from "./tabs-renderer";
+
+import TabsHandler from "./tabs-handler";
 
 export default class TabsEventHandlers {
   constructor(api) {
     this.api = api;
-    this.renderer = new TabsRenderer();
+    this.handler = new TabsHandler();
     this.defaultData = {
       title: "NewTab",
       data: [
@@ -34,7 +35,7 @@ export default class TabsEventHandlers {
   }
 
   editTabEvent(event) {
-    let elem = event.target.parentNode.querySelector("[edit-tab-id]");
+    let elem = event.target.closest("[edit-tab-id]");
     let tabId = elem.getAttribute("edit-tab-id");
     let a = document.querySelector(`#${tabId}`);
     let isEditable = a.getAttribute("contenteditable");
@@ -101,8 +102,8 @@ export default class TabsEventHandlers {
     // add a tab heading
     let id = crypto.randomUUID();
     let active = false;
-    let renderer = this.renderer.renderTab(id, this.defaultData, active);
-    tabParent.insertAdjacentHTML("beforeend", renderer);
+    let renderer = this.handler.renderTab(id, this.defaultData, active);
+    tabParent.appendChild(renderer);
     this.addTabPanel(id, this.defaultData, active);
     this.addTabEventHandlers(tabParent);
   }
@@ -111,8 +112,8 @@ export default class TabsEventHandlers {
     let tabContentParent = document.querySelector(".tab-content");
     console.log(tabContentParent);
     let tabId = tabContentParent.getAttribute("id");
-    let renderer = this.renderer.renderTabPanel(id, tabData, active);
-    tabContentParent.insertAdjacentHTML("beforeend", renderer);
+    let renderer = this.handler.renderTabPanel(id, tabData, active);
+    tabContentParent.appendChild(renderer);
   }
 
   addImageCaptionEventHandlers(parent) {
@@ -127,9 +128,7 @@ export default class TabsEventHandlers {
   addImageCaptionEvent(event) {
     let parent = event.target.parentNode;
     let img = parent.querySelector("figure > img");
-    let figCaption = parent.querySelector(
-      "figure > figcaption"
-    );
+    let figCaption = parent.querySelector("figure > figcaption");
     img.alt = event.target.value;
     figCaption.textContent = event.target.value;
   }

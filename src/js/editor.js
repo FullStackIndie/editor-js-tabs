@@ -16,8 +16,6 @@ import Delimiter from "@editorjs/delimiter";
 import ImageTool from "@editorjs/image";
 import LinkTool from "@editorjs/link";
 import NestedList from "@editorjs/nested-list";
-import DragDrop from "editorjs-drag-drop";
-import Undo from "editorjs-undo";
 import Tabs from "./tabs/editorjs-tabs";
 import EmbedCustom from "./embed/embed";
 import Alert from "editorjs-alert";
@@ -30,13 +28,7 @@ export default function useEditorJS(data) {
   const editor = new EditorJS({
     holder: "editorjs",
     data: data,
-    inlineToolbar: [
-      "link",
-      "marker",
-      "bold",
-      "italic",
-      "underline",
-    ],
+    inlineToolbar: ["link", "marker", "bold", "italic", "underline"],
     onChange: (api, event) => {
       console.log("Now I know that Editor's content changed!", event);
       document.querySelectorAll("pre code").forEach((code) => {
@@ -46,9 +38,6 @@ export default function useEditorJS(data) {
       });
     },
     onReady: () => {
-      const undo = new Undo({ editor });
-      undo.initialize(data);
-      new DragDrop(editor);
       // data.blocks.forEach((block) => {
       //   if(Object.hasOwn(block, 'tunes')){
       //     if(Object.hasOwn(block.tunes, 'alignTune')){

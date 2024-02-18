@@ -75,7 +75,7 @@ export default class TabsSettings {
   ];
 
   languageList = [
-    { name: "PlainText", code: "" },
+    { name: "PlainText", code: "plaintext" },
     { name: "HTML", code: "html" },
     { name: "CSS", code: "css" },
     { name: "JavaScript", code: "js" },

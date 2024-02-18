@@ -232,10 +232,7 @@ export default class Parser {
 
   parseTabs(elem) {
     console.log(`found ${elem.type} element ${JSON.stringify(elem)}`);
-    const renderedPanels = this.handleTabRendering(
-      elem.data.tabHeadingTitles,
-      elem.data.tabContent
-    );
+    const renderedPanels = this.handleTabRendering(elem.data);
     let renderer = `<div class="bordered-tab-contents">`;
     renderer += renderedPanels.tabs;
     renderer += renderedPanels.panels;
@@ -261,10 +258,14 @@ export default class Parser {
     </div>`;
   }
 
-  handleTabRendering(tabTitles, tabContent) {
+  handleTabRendering(data) {
+    /// rewrite to render based on data/content type
+    /// have different classes for each type of content
     let tabId = crypto.randomUUID();
     let tabRenderer = `<ul class="nav nav-tabs " id="tab-${tabId}" role="tablist">`;
     let tabPanelRenderer = `<div class="tab-content bordered-tab-contents" id="tabContent-${tabId}">`;
+    let tabTitles = data.map((tab) => tab.title);
+    let 
     for (let i = 0; i <= tabTitles.length - 1; i++) {
       let currentId = crypto.randomUUID();
       if (i === 0) {
