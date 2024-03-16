@@ -35,10 +35,11 @@ export default class TabsInlineMenu {
     );
     let svg = menuItem.querySelector("svg");
     let bindEventHandlers = newEventClass.eventHandler.bind(
-      null,
+      newEventClass,
       svg,
       "[data-tab-item]"
     );
+
     bindEventHandlers();
     return menuItem;
   }

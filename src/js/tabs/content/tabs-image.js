@@ -6,50 +6,26 @@ export default class TabsImage {
   }
 
   imageSettings = {
-    url: "",
     width: "400",
     height: "200",
-    caption: "",
   };
 
   renderSavedImage(data) {
-    let imageContentWrapper = this.renderImageContentWrapper();
     let imageContent = this.renderImageContent(data);
-    imageContentWrapper.appendChild(imageContent);
-    return imageContentWrapper;
+    return imageContent;
   }
 
-  renderUploadedImage(imageData) {
+  renderUploadedImage(data) {
     let tabContentParent = document.querySelector(
       ".tab-content > .show.active"
     );
     let tabId = tabContentParent.getAttribute("id");
     let tabContent = document.getElementById(tabId);
 
-    let imageContentWrapper = this.renderImageContentWrapper();
-    this.imageSettings.url = imageData.file.url;
-    let imageContent = this.renderImageContent(this.imageSettings);
-    imageContentWrapper.appendChild(imageContent);
-    this.addImageCaptionEventHandlers(imageContentWrapper);
+    let imageContent = this.renderImageContent(data);
+    this.addImageCaptionEventHandlers(imageContent);
 
-    tabContent.appendChild(imageContentWrapper);
-    return tabContent;
-  }
-
-  renderUploadedImage(imageData, parent) {
-    let tabContentParent = document.querySelector(
-      ".tab-content > .show.active"
-    );
-    let tabId = tabContentParent.getAttribute("id");
-    let tabContent = document.getElementById(tabId);
-
-    let imageContentWrapper = this.renderImageContentWrapper();
-    this.imageSettings.url = imageData.file.url;
-    let imageContent = this.renderImageContent(this.imageSettings);
-    imageContentWrapper.appendChild(imageContent);
-    this.addImageCaptionEventHandlers(imageContentWrapper);
-
-    tabContent.appendChild(imageContentWrapper);
+    tabContent.appendChild(imageContent);
     return tabContent;
   }
 
@@ -81,9 +57,9 @@ export default class TabsImage {
 
     let image = document.createElement("img");
     image.setAttribute("src", data.url);
-    image.setAttribute("class", "img-fluid  mt-5 mb-2");
-    image.setAttribute("width", data.width);
-    image.setAttribute("height", data.height);
+    image.setAttribute("class", "img-fluid mt-5 mb-2");
+    image.setAttribute("width", this.imageSettings.width);
+    image.setAttribute("height", this.imageSettings.height);
     image.setAttribute("alt", data.caption);
     image.setAttribute("data-tab-img", "");
 
@@ -104,7 +80,7 @@ export default class TabsImage {
     captionInput.setAttribute("aria-describedby", "imageLabel");
     captionInput.setAttribute("data-tab-img-caption", "");
     captionInput.value = data.caption;
-
+    
     figure.appendChild(image);
     figure.appendChild(figCaption);
     figure.appendChild(captionInput);
@@ -113,49 +89,49 @@ export default class TabsImage {
     return figureWrapper;
   }
 
-  uploadImage(callback, file) {
-    if (!file) {
-      console.error("Please select an image.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    fetch("https://dev.blog.fullstackindie.net/api/image", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Handle the successful response
-        console.log("Success:", data);
-        // this.renderUploadedImage(data);
-        callback.apply(this, [data]);
-      })
-      .catch((error) => {
-        // Handle errors
-        console.error("Error:", error);
-      });
-  }
-
-  createImageEventButton(callback) {
+  createImageEventButton() {
     const imageInput = document.createElement("input");
     imageInput.type = "file";
     imageInput.accept = "image/*";
     imageInput.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      // Handle the image file here
-      // need callback to render image
-      // passing it to uploadImage function since this function
-      // is the entry point
-      this.uploadImage(callback, file);
+      this.addImagePromise(event.target.files[0])
+        .then((data) => {
+          console.log(data);
+          return this.renderUploadedImage(data.file);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     });
-    return imageInput;
+    let image = imageInput.click();
+    return image;
+  }
+
+  addImagePromise(file) {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("https://dev.blog.fullstackindie.net/api/image", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Handle the successful response
+          console.log("Success:", data);
+          resolve(data);
+        })
+        .catch((error) => {
+          // Handle errors
+          console.error("Error:", error);
+          reject(error);
+        });
+    });
   }
 }

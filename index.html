@@ -12,15 +12,113 @@
 </head>
 
 <body style="width: 100%;height:100%">
-  <div class="form-group mb-5">
-    <label class="control-label" for="Content">Content</label>
-    <input type="text" hidden="" id="Content" name="Content" value='' />
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <br>
+        <div id="editorjs"></div>
+        <!-- Sticky Sidebar -->
+        <div class="sticky-container">
+          <button type="button" class="btn btn-dark" data-toggle="collapse" data-target="#sticky-collapse">&gt;</button>
+          <ul class="sticky collapse" id="sticky-collapse">
+            <li>
+              <button type="button" class="btn btn-success" id="preview-btn">Preview</button>
+            </li>
+            <li>
+              <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#paste-json-modal">Paste
+                Json</button>
+            </li>
+            <li>
+              <button type="button" class="btn btn-info" id="copy-json">Copy Json</button>
+            </li>
+            <li>
+              <button type="button" class="btn btn-primary" data-toggle="modal"
+                data-target="#restore-data-modal">Restore Data</button>
+            </li>
+            <li>
+              <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-data-modal">
+                Delete Data
+              </button>
+            </li>
+          </ul>
+        </div>
+        <!-- End Sticky Sidebar -->
+        <!-- Delete Data Modal -->
+        <div class="modal fade" id="delete-data-modal" tabindex="-1" role="dialog" aria-labelledby="delete-data-label"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="delete-data-title">Delete Backups</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Do you want to delete all Blog Post Data?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="delete-data-permanent">Delete Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Delete Modal -->
+        <!-- Restore Data Modal -->
+        <div class="modal fade" id="restore-data-modal" tabindex="-1" role="dialog" aria-labelledby="restore-data-label"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="restore-data-title">Restore Backup</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Do you want to restore the Blog to the most recent backup?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="restore-data">Restore Lastest Backup</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Restore Data Modal -->
+        <!-- Paste History Modal -->
+        <div class="modal fade" id="paste-json-modal" tabindex="-1" role="dialog" aria-labelledby="paste-json-label"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Paste Json</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="paste-json-input">Paste Your Json Here to load it in EditorJS</label>
+                  <textarea class="form-control" id="paste-json-input" rows="7"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal" id="paste-json-clipboard">From
+                  Clipboard</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="paste-json">Paste Json</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Paste History Modal -->
+        <div id="history-cache"></div>
+        <div id="preview"></div>
+      </div>
+    </div>
   </div>
-  <div id="editorjs"></div>
-  <button type="button" id="save">Save</button>
-  <button type="button" id="load">Load</button>
-  <button type="button" id="preview-btn">Preview</button>
-  <div id="preview"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
     integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -29,33 +127,154 @@
     integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
     crossorigin="anonymous"></script>
 
+
   <script async type="module">
-    import * as Main from './src/js/main';
+    import * as blog from './src/js/blog-write.js';
+
+
+    let cacheKey = window.location.pathname;
+    let data = await blog.loadSavedData(cacheKey);
+
+    const editor = blog.initEditorJS(data);
+    const hljs = await blog.initHighlightJS();
+    blog.parser.config.path = 'bs4.html?raw';
 
     let saved = false;
-    const editor = Main.initializeEditorJS();
-    const hljs = Main.initializeHighlightJs();
+    let previewIsActive = false;
+    let previewWindow = null;
+
+    const previewRequest = {
+      type: 'preview',
+      url: 'http://localhost:5173',
+      html: ''
+    };
 
     addEventListeners();
+    setInterval(saveBackup, 30_000);
 
-    function previewData()
+    async function launchWindow()
     {
-      Main.previewDataAsHtml('preview');
-      document.querySelectorAll('pre code').forEach((code) =>
+      if (previewWindow === null || previewWindow.closed)
       {
-        console.log(`code block ${code}`);
-        hljs.highlightElement(code);
+        previewWindow = window.open('http://localhost:5173/sites/preview.html', '_blank', 'popup=yes,left=500,height=670,width=750,scrollbars=yes');
+        let lastSave = await blog.loadSavedData(cacheKey);
+        let html = await blog.getParsedData(lastSave);
+        previewWindow.document.querySelector('#preview').innerHTML = html.innerHTML;
+      } else
+      {
+        previewWindow.focus();
+      }
+    }
+
+    function closeWindow()
+    {
+      if (previewWindow)
+      {
+        previewWindow.close();
+      }
+    }
+
+    function updateWindowPreview(html)
+    {
+      if (previewWindow)
+      {
+        previewRequest.html = html.innerHTML;
+        previewWindow.postMessage(previewRequest, previewRequest.url);
+      }
+    }
+
+    async function handlePreviewState()
+    {
+      let preview = document.getElementById('preview');
+      let previewBtn = document.getElementById('preview-btn');
+      if (previewIsActive)
+      {
+        previewIsActive = false;
+        previewBtn.innerText = "Preview";
+        preview.innerHTML = "";
+        closeWindow();
+      } else
+      {
+        previewIsActive = true;
+        await previewData();
+        launchWindow(data);
+        previewBtn.innerText = "Close Preview";
+      }
+    }
+
+    async function previewData()
+    {
+      await blog.previewData(editor).then((html) =>
+      {
+        // html.querySelectorAll('pre code').forEach((code) =>
+        // {
+        //   hljs.highlightBlock(code);
+        // });
+        updateWindowPreview(html);
+      }).catch((error) =>
+      {
+        console.log("Preview Error: ", error);
       });
     }
 
-    function saveData()
+    function saveBackup()
     {
-      Main.saveData(editor);
+
+      editor.save().then(async (data) =>
+      {
+        await blog.saveBackup(data, cacheKey).catch((error) =>
+        {
+          console.log("Backup Error: ", error);
+        });
+      }).catch((error) =>
+      {
+        console.log("Saving failed: ", error);
+      });
     }
-    function loadData()
+
+
+    function clearData()  
     {
-      Main.loadData(editor);
+      editor.clear();
+      $('#delete-data-modal').modal('hide');
     }
+
+
+    async function restoreData()
+    {
+      data = await blog.loadBackup(cacheKey).catch((error) =>
+      {
+        console.log("Backup Error: ", error);
+      });
+
+      editor
+        .render(data)
+        .catch((error) =>
+        {
+          console.log("Saving failed: ", error);
+        });
+      $('#restore-data-modal').modal('hide');
+    }
+
+
+    function pasteJson()
+    {
+      let json = document.getElementById('paste-json-input').value;
+      if (!blog.isJson(json))
+      {
+        alert("Invalid Json");
+        return;
+      }
+      $('#paste-json-modal').modal('hide');
+      let data = JSON.parse(json);
+      editor
+        .render(data)
+        .catch((error) =>
+        {
+          alert("Loading JSON failed: ", error);
+        });
+    }
+
 
     function addEventListeners()
     {
@@ -69,11 +288,67 @@
       }
     }
 
+    async function savedDataToJsonClipboardAsync()
+    {
+      try
+      {
+        let savedData = await blog.loadSavedData(cacheKey);
+        if (!savedData)
+        {
+          alert("Error: No data to copy to json");
+          return;
+        }
+        let json = JSON.stringify(savedData);
+        await navigator.clipboard.writeText(json);
+      } catch (error)
+      {
+        console.error("Error copying text:", error);
+      }
+    }
+
+    async function getDataFromClipboardAsync()
+    {
+      navigator.clipboard.readText()
+        .then(text =>
+        {
+          if (!blog.isJson(text))
+          {
+            alert("Invalid Json");
+            return;
+          }
+          let data = JSON.parse(text);
+          editor
+            .render(data)
+            .catch((error) =>
+            {
+              alert("Loading JSON failed: ", error);
+            });
+        })
+        .catch(err =>
+        {
+          console.error('Failed to read clipboard contents: ', err);
+        });
+    }
+
+
     function addSavedDataEvent()
     {
-      document.getElementById('save').onclick = saveData;
-      document.getElementById('load').onclick = loadData;
-      document.getElementById('preview-btn').onclick = previewData;
+      window.addEventListener('message', (event) =>
+      {
+        if (event.origin === previewRequest.url)
+        {
+          if (event.data.type === 'refresh')
+          {
+            previewData();
+          }
+        }
+      });
+      document.getElementById('preview-btn').onclick = async () => await handlePreviewState();
+      document.getElementById('delete-data-permanent').onclick = clearData;
+      document.getElementById('restore-data').onclick = restoreData;
+      document.getElementById('paste-json').onclick = pasteJson;
+      document.getElementById('paste-json-clipboard').onclick = getDataFromClipboardAsync;
+      document.getElementById('copy-json').onclick = async () => await savedDataToJsonClipboardAsync();
     }
   </script>
 

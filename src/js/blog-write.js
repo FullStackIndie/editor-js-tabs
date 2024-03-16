@@ -1,36 +1,59 @@
 import Parser from "./parser/editor-parser";
-import EditorJSInit from "./editor";
+import Backups from "./backup/backups";
+import EditorJS from "./editor";
 import { useHighlightJS } from "./highlight";
 import { isJson } from "./helpers/json-helpers";
+import Save from "./backup/save";
 
-export { default as Parser } from "./parser/editor-parser";
+export const backups = new Backups();
+export const editorJS = new EditorJS();
+export const parser = new Parser();
+export const save = new Save();
+export const hljs = await initHighlightJS();
 
+export { isJson } from "./helpers/json-helpers";
 
-
-
-
-
-
-export function restoreSelectedHistory(document, editor) {
-  let historyParent = document.querySelector(
-    `a.nav-link.active[data-toggle="pill"]`
-  );
-  let historyId = historyParent.getAttribute("href");
-  let history = document.querySelector(historyId);
-  console.log(history);
-  return history.innerHTML;
+export async function previewData(editorJS) {
+  return new Promise((resolve, reject) => {
+    editorJS
+      .save()
+      .then(async (data) => {
+        let html = await parser.parseDataToHtml(data);
+        html.querySelectorAll("pre code").forEach((code) => {
+          hljs.highlightElement(code);
+        });
+        resolve(html || "Error: No data to preview");
+      })
+      .catch((error) => {
+        console.log("Preview Error: ", error);
+        reject(error);
+      });
+  });
 }
 
-export async function loadHistory() {
-  let data = localStorage.getItem(cacheKey);
-  if (!isJson(data)) {
-    let wrapper = document.createElement("div");
-    wrapper.classList.add("alert", "alert-warning", "mt-3");
-    wrapper.textContent = "No history found";
-    return wrapper;
-  }
-  let json = JSON.parse(data);
-  return await renderList(json);
+export async function getParsedData(data) {
+  let html = await parser.parseDataToHtml(data);
+  html.querySelectorAll("pre code").forEach((code) => {
+    hljs.highlightElement(code);
+  });
+  return html || "Error: No data to preview";
+}
+
+export async function loadSavedData(cacheKey) {
+  return save.getSavedData(cacheKey).catch((error) => {
+    console.log("Saved Data Error: ", error);
+  });
+}
+
+export async function saveBackup(data, cacheKey) {
+  data.cacheKey = cacheKey;
+  return backups.updateBackup(data);
+}
+
+export async function loadBackup(cacheKey) {
+  return backups.getLastBackup(cacheKey).catch((error) => {
+    console.log("Backup Error: ", error);
+  });
 }
 
 export async function renderList(data) {
@@ -53,7 +76,6 @@ export async function renderList(data) {
   pillItemWrapper.classList.add("tab-content", "col-9");
   pillItemWrapper.setAttribute("id", "history-pills-tab-content");
 
-  let parser = new Parser();
   for (let i = data.length - 1; i >= 0; i--) {
     let pillAnchor = renderPillAnchor(data[i], i);
     pillWrapper.appendChild(pillAnchor);
@@ -97,24 +119,43 @@ export function renderPillContent(index) {
   return pillContent;
 }
 
-
-
-export function getData() {
-  let content = localStorage.getItem(saveKey);
-  if (content == null || content == "undefined") {
-    console.log(`Content was null`);
-    return "{}";
-  } else {
-    return content;
-  }
+export function restoreSelectedHistory(document, editor) {
+  let historyParent = document.querySelector(
+    `a.nav-link.active[data-toggle="pill"]`
+  );
+  let historyId = historyParent.getAttribute("href");
+  let history = document.querySelector(historyId);
+  console.log(history);
+  return history.innerHTML;
 }
 
 /**
  * Initialize the editorjs instance
  * @returns {EditorJS} - The editorjs instance
  */
-export function initializeEditorJS() {
-  let data = getData(saveKey);
-  const editor = useEditorJS(JSON.parse(data));
-  return editor;
+export function initEditorJS(data) {
+  if (isJson(data)) {
+    data = JSON.parse(data);
+  } else if (data === null || data === "undefined") {
+    data = "{}";
+  }
+  return editorJS.initEditorJS(data);
+}
+
+export async function initHighlightJS() {
+  let config = {
+    languages: [
+      "javascript",
+      "css",
+      "json",
+      "markdown",
+      "csharp",
+      "python",
+      "ruby",
+      "typescript",
+      "xml",
+      "yaml",
+    ],
+  };
+  return useHighlightJS(config);
 }

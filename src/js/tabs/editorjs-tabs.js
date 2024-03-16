@@ -3,7 +3,9 @@ import TabsSettings from "./tabs-settings";
 import TabsHandler from "./tabs-handler";
 import { tabsSvgIcon } from "./tabs-icons";
 import TabsEventHandlers from "./tabs-event-handlers";
-import TabsImageHandler from "./content/tabs-image";
+import TabsImage from "./content/tabs-image";
+import TabsText from "./content/tabs-text";
+import TabsCodeBlock from "./content/tabs-code-block";
 import { isEmpty } from "lodash-es";
 
 export default class Tabs {
@@ -11,7 +13,9 @@ export default class Tabs {
     this.settings = new TabsSettings();
     this.tabHandler = new TabsHandler();
     this.eventHandler = new TabsEventHandlers(api);
-    this.imageHandler = new TabsImageHandler();
+    this.tabsImage = new TabsImage();
+    this.tabsText = new TabsText();
+    this.tabsCodeBlock = new TabsCodeBlock();
     this.data = data || this.settings.defaultData;
     this.api = api;
     this.config = config || this.settings.defaultConfig;
@@ -49,14 +53,22 @@ export default class Tabs {
   save(blockContent) {
     let tabs = blockContent.querySelectorAll(".nav-link");
     let result = [];
-    tabs.forEach((tab) => {
+    tabs.forEach((tab, index) => {
       let tabContent = {};
       tabContent.title = tab.textContent.trim();
       let tabId = tab.getAttribute("aria-controls");
+      tabContent.tabId = tab.getAttribute("id");
+      tabContent.tabContentId = tabId;
+      if (index === 0) {
+        tabContent.active = true;
+        tabContent.activeClass = "show active";
+      } else {
+        tabContent.active = false;
+        tabContent.activeClass = "";
+      }
       tabContent.data = this.getTabContent(tabId);
       result.push(tabContent);
     });
-    console.log(result);
     return result;
   }
 
@@ -77,9 +89,15 @@ export default class Tabs {
         data.type = "image";
         data.index = currentIndex++;
         data.url = content.src;
-        data.caption = content.alt;
+        data.caption = "";
         data.width = content.width;
         data.height = content.height;
+        let dataCaption = content.parentNode.querySelector(
+          "[data-tab-img-caption]"
+        );
+        if (dataCaption) {
+          data.caption = dataCaption.value;
+        }
         isValid = true;
       } else if (content.matches("textarea[data-tab-code]")) {
         let parent = content.parentNode;
@@ -88,10 +106,13 @@ export default class Tabs {
           select.selectedIndex = 0;
         }
         let selectedValue = select.options[select.selectedIndex].value;
-        data.type = "code-block";
+        data.type = "codeBlock";
         data.index = currentIndex++;
         data.code = content.value;
-        data.lang = selectedValue;
+        data.language = this.settings.languageList.find(
+          (l) => l.code === selectedValue
+        ).name;
+        data.languageCode = selectedValue;
         isValid = true;
       }
       if (isValid) {
@@ -134,18 +155,18 @@ export default class Tabs {
       });
     } else if (setting.name === "image") {
       button.addEventListener("click", () => {
-        this.imageHandler.createImageEventButton().click();
+        this.tabsImage.createImageEventButton().click();
       });
     } else if (setting.name === "text") {
       button.addEventListener("click", () => {
         tabContent.appendChild(
-          this.tabHandler.renderTextContent({ content: "Edit" })
+          this.tabsText.renderTextContent({ content: "Edit" })
         );
       });
     } else if (setting.name === "code") {
       button.addEventListener("click", () => {
         tabContent.appendChild(
-          this.tabHandler.renderCodeContent({ lang: "javascript" })
+          this.tabsCodeBlock.renderCodeContent({ lang: "javascript", code: "" })
         );
       });
     }
@@ -156,8 +177,8 @@ export default class Tabs {
     new Sortable(tabContentPanel, {
       swapThreshold: 0.65, // elements must be 1% in the direction dragged to swap
       animation: 150, // duration of the swap animation in milliseconds
-      fallbackOnBody: true,
       dragoverBubble: true,
+      handle: ".ce-toolbar__settings-btn",
     });
   }
 

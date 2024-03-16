@@ -3,22 +3,24 @@ import TabsImage from "../../content/tabs-image";
 
 export default class InlineAddImage {
   static get attribute() {
-    return { key: "add-tab-image", value: "" };
+    return { menuKey: "add-tab-image", itemKey: "data-tab-img" };
   }
 
   static get icon() {
     return addImageSvgIcon;
   }
 
+  static onDeleteEvent(event) {
+    console.log("Image Deleted");
+  }
+
   eventHandler(elem, selector) {
     elem.addEventListener("click", (e) => {
       let dataItem = e.target.closest(selector);
       let tabsImage = new TabsImage();
-      tabsImage.createImageEventButton().click();
-      let imageContent = tabsImage.renderImageContent({
-        url: "www.google.com",
-      });
-      dataItem.parentNode.insertBefore(imageContent, dataItem.nextSibling);
+      let imageContent = tabsImage.createImageEventButton();
+      console.log(imageContent);
+      // dataItem.parentNode.insertBefore(imageContent, dataItem.nextSibling);
     });
   }
 }

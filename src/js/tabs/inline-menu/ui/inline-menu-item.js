@@ -8,7 +8,7 @@ export default class InlineMenuItem {
     columWrapper.classList.add("col-2");
 
     let itemWrapper = document.createElement("div");
-    itemWrapper.setAttribute(attribute.key, attribute.value);
+    itemWrapper.setAttribute(attribute.menuKey, "");
     itemWrapper.insertAdjacentHTML("afterbegin", icon);
 
     columWrapper.appendChild(itemWrapper);

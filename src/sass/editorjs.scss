@@ -1,7 +1,7 @@
 @import "../js/code-block/code-block";
 
 .multiline {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 
 // [contenteditable="true"]:active,
@@ -11,31 +11,31 @@
 // }
 
 textarea {
-    width: 100%;
-    height: 100%;
-    // resize: none; /* Disable textarea resizing if not needed */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  width: 100%;
+  height: 100%;
+  // resize: none; /* Disable textarea resizing if not needed */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .bordered-tab-contents > .tab-content > .tab-pane {
-    border-left: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    border-radius: 0px 0px 5px 5px;
-    padding: 10px;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  border-radius: 0px 0px 5px 5px;
+  padding: 10px;
 }
 
 .bordered-tab-contents > .nav-tabs {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .nav-link {
-    position: relative;
-    padding-right: 25px;
+  position: relative;
+  padding-right: 25px;
 }
 
 //////////////////////////////////////////
-/// 
+///
 /// custom
 /* CSS code for the popup toolbar */
 .popup-toolbar {
@@ -51,32 +51,32 @@ textarea {
 
 .popup-btn {
   display: inline-block; /* display the buttons inline */
-  width: 24px; /* set the width of the buttons */
-  height: 24px; /* set the height of the buttons */
-  margin: 2px; /* set the margin of the buttons */
-  background-color: transparent; /* set the background color of the buttons */
-  border: none; /* remove the border of the buttons */
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  background-color: transparent;
+  border: none;
   cursor: pointer; /* change the cursor to pointer when hovering over the buttons */
 }
 
 .popup-btn:hover {
-  background-color: #eee; /* change the background color of the buttons when hovering */
+  background-color: #eee;
 }
 
 .popup-btn.add-img:hover {
-  background-color: #cbf1bc; /* change the background color of the buttons when hovering */
+  background-color: #cbf1bc;
 }
 
 .popup-btn.add-text:hover {
-  background-color: #ffd0d0; /* change the background color of the buttons when hovering */
+  background-color: #ffd0d0;
 }
 
 .popup-btn.add-code:hover {
-  background-color: #c3a0e4; /* change the background color of the buttons when hovering */
+  background-color: #c3a0e4;
 }
 
 .popup-btn.delete:hover {
-  background-color: #e61c1c; /* change the background color of the buttons when hovering */
+  background-color: #e61c1c;
 }
 
 .popup-btn svg {

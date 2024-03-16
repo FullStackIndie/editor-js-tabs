@@ -39,7 +39,7 @@ export default class TabsCodeBlock {
     textarea.setAttribute("placeholder", "Paste Code");
     textarea.value = data.code;
 
-    picker.value = data.lang;
+    picker.value = data.languageCode;
 
     textarea.addEventListener("keydown", (event) => {
       switch (event.code) {

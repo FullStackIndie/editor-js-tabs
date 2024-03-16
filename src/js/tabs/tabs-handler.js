@@ -13,15 +13,12 @@ export default class TabsHandler {
   }
 
   handleTabRendering(tabsData) {
-    let tabId = crypto.randomUUID();
     let tabRendererList = document.createElement("ul");
     tabRendererList.classList.add("nav", "nav-tabs");
-    tabRendererList.setAttribute("id", `tab-${tabId}`);
     tabRendererList.setAttribute("role", "tablist");
 
     let tabPanelWrapper = document.createElement("div");
     tabPanelWrapper.classList.add("tab-content");
-    tabPanelWrapper.setAttribute("id", `tabContent-${tabId}`);
 
     for (let i = 0; i <= tabsData.length - 1; i++) {
       let currentId = crypto.randomUUID();
@@ -38,8 +35,8 @@ export default class TabsHandler {
 
   renderTab(id, tabData, active) {
     let titleLowerCase = tabData.title.toLowerCase();
-    let tabId = `${titleLowerCase}-tab-${id}`;
-    let tabPanelId = `${titleLowerCase}-${id}`;
+    let tabId = tabData.tabId || `${titleLowerCase}-tab-${id}`;
+    let tabPanelId = tabData.tabContentId || `${titleLowerCase}-${id}`;
 
     let tabListItem = document.createElement("li");
     tabListItem.classList.add("nav-item");
@@ -69,14 +66,17 @@ export default class TabsHandler {
 
   renderTabPanel(id, tabData, active) {
     let titleLowerCase = tabData.title.toLowerCase();
+    let tabId = tabData.tabId || `${titleLowerCase}-tab-${id}`;
+    let tabPanelId = tabData.tabContentId || `${titleLowerCase}-${id}`;
+
     let tabWrapper = document.createElement("div");
     tabWrapper.classList.add("tab-pane", "fade");
     if (active) {
       tabWrapper.classList.add("show", "active");
     }
-    tabWrapper.setAttribute("id", `${titleLowerCase}-${id}`);
+    tabWrapper.setAttribute("id", tabPanelId);
     tabWrapper.setAttribute("role", "tabpanel");
-    tabWrapper.setAttribute("aria-labelledby", `${titleLowerCase}-tab-${id}`);
+    tabWrapper.setAttribute("aria-labelledby", tabId);
     tabData.data.forEach((tabData) => {
       tabWrapper.appendChild(this.handleTabContent(tabData));
     });
@@ -88,10 +88,8 @@ export default class TabsHandler {
       return this.tabsText.renderTextContent(tabData);
     } else if (tabData.type === "image") {
       return this.tabsImage.renderImageContent(tabData);
-    } else if (tabData.type === "code-block") {
+    } else if (tabData.type === "codeBlock") {
       return this.tabsCodeBlock.renderCodeContent(tabData);
     }
   }
-
-
 }

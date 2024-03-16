@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EditorJS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" lang="scss" href="../src/sass/styles.scss">
+</head>
+
+<body style="width: 100%;height:100%">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <div class="sticky-container">
+                    <a type="button" id="refresh-btn" class="btn btn-light" data-toggle="collapse"
+                        data-target="#sticky-collapse">
+                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M3 3V8M3 8H8M3 8L6 5.29168C7.59227 3.86656 9.69494 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.71683 21 4.13247 18.008 3.22302 14"
+                                    stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                </path>
+                            </g>
+                        </svg></a>
+                </div>
+                <div id="preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+        crossorigin="anonymous"></script>
+
+
+    <script type="module">
+        addEventListeners();
+
+        const refreshRequest = {
+            type: 'refresh',
+            url: 'http://localhost:5173'
+        };
+
+        function handlePreviewState(html)
+        {
+            let preview = document.getElementById('preview');
+            preview.innerHTML = "";
+            preview.insertAdjacentHTML('afterbegin',html);
+        }
+
+        function refreshPreview()
+        {
+            let preview = document.getElementById('preview');
+            preview.innerHTML = "";
+            window.opener.postMessage(refreshRequest, refreshRequest.url);
+        }
+
+
+        function addEventListeners()
+        {
+            window.addEventListener('message', (event) =>
+            {
+                if (event.origin === refreshRequest.url)
+                {
+                    if (event.data.type === 'preview')
+                    {
+                        handlePreviewState(event.data.html);
+                    }
+                }
+                {
+                    if (event.data.type === 'preview')
+                    {
+                        handlePreviewState(event.data.html);
+                    }
+                }
+            });
+            document.getElementById('refresh-btn').onclick = refreshPreview;
+        }
+    </script>
+</body>
+
+</html>

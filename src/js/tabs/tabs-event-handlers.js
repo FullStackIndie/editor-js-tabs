@@ -117,8 +117,7 @@ export default class TabsEventHandlers {
   }
 
   addImageCaptionEventHandlers(parent) {
-    const imageCaptions = parent.querySelectorAll("[data-tab-img-caption]");
-    console.log(imageCaptions);
+    let imageCaptions = parent.querySelectorAll("[data-tab-img-caption]");
     imageCaptions.forEach((imageCaption) => {
       imageCaption.removeEventListener("input", this.addImageCaptionEvent);
       imageCaption.addEventListener("input", this.addImageCaptionEvent);

@@ -12,21 +12,8 @@ export default class TabsSettings {
       data: [
         {
           type: "text",
-          content: `Tab 1 Content  before image`,
+          content: `Edit`,
           index: 0,
-        },
-        {
-          type: "image",
-          url: "https://editorjs.io/uploads/b6f67765578fa6e65d1bc6a7526425ee.jpeg",
-          caption: "editor js Codex",
-          width: 400,
-          height: 300,
-          index: 1,
-        },
-        {
-          type: "text",
-          content: `More content After image`,
-          index: 2,
         },
       ],
     },
@@ -35,13 +22,8 @@ export default class TabsSettings {
       data: [
         {
           type: "text",
-          content: `Tab 1 Content`,
+          content: `Edit`,
           index: 0,
-        },
-        {
-          type: "text",
-          content: `Tab 2 Content`,
-          index: 1,
         },
       ],
     },

@@ -3,11 +3,15 @@ import TabsText from "../../content/tabs-text";
 
 export default class InlineAddText {
   static get attribute() {
-    return { key: "add-tab-text", value: "" };
+    return { menuKey: "add-tab-text", itemKey: "data-tab-text" };
   }
 
   static get icon() {
     return addTextSvgIcon;
+  }
+
+  static onDeleteEvent(event) {
+    console.log("Text Deleted");
   }
 
   eventHandler(elem, selector) {
@@ -17,10 +21,7 @@ export default class InlineAddText {
       let textContent = tabsText.renderTextContent({
         content: "Edit",
       });
-      dataItem.parentNode.insertBefore(
-        textContent,
-        dataItem.nextSibling
-      );
+      dataItem.parentNode.insertBefore(textContent, dataItem.nextSibling);
     });
   }
 }

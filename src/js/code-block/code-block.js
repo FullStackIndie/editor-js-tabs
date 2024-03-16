@@ -1,4 +1,3 @@
-
 export default class CodeBlock {
   /**
    * Allow to press Enter inside the CodeBlock textarea
@@ -310,7 +309,6 @@ export default class CodeBlock {
       }
     });
 
-
     this.nodes.textarea = textarea;
     this.nodes.picker = picker;
 
@@ -335,9 +333,11 @@ export default class CodeBlock {
    * @public
    */
   save(codeWrapper) {
+    let code = codeWrapper.querySelector("textarea").value;
+    let languageCode = codeWrapper.querySelector("select").value;
     return {
-      code: codeWrapper.querySelector("textarea").value,
-      languageCode: codeWrapper.querySelector("select").value,
+      code: code,
+      languageCode: languageCode,
     };
   }
 
@@ -427,5 +427,4 @@ export default class CodeBlock {
       code: true, // Allow HTML tags
     };
   }
-
 }
