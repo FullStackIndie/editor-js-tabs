@@ -11,7 +11,9 @@ export default class InlineAddImage {
   }
 
   static onDeleteEvent(event) {
-    console.log("Image Deleted");
+    if(event.target) {
+      console.log("Image Deleted");
+    }
   }
 
   eventHandler(elem, selector) {

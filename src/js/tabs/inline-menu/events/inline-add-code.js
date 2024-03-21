@@ -11,7 +11,9 @@ export default class InlineAddCode {
   }
 
   static onDeleteEvent(event) {
-    console.log("Code Deleted");
+    if(event.target) {
+      console.log("Code Deleted");
+    }
   }
 
   eventHandler(elem, selector) {

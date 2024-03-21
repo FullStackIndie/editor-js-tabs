@@ -1,5 +1,2 @@
-pre > code {
-    white-space: pre;
-    margin-top: -1.00em;
-    display: block;
-}
+@import "highlight.js/styles/vs2015.min.css";
+

@@ -45,6 +45,13 @@
 
 
     <script type="module">
+        import Parser from '../src/js/parser/parser2html.js';
+        import { useHighlightJS } from '../src/js/highlight.js';
+
+        const hljs = await useHighlightJS();
+        const parser = new Parser();
+        parser.config.path = 'bs4.html?raw';
+
         addEventListeners();
 
         const refreshRequest = {
@@ -52,11 +59,12 @@
             url: 'http://localhost:5173'
         };
 
-        function handlePreviewState(html)
+        async function handlePreviewState(html)
         {
             let preview = document.getElementById('preview');
             preview.innerHTML = "";
-            preview.insertAdjacentHTML('afterbegin',html);
+            let parsedHtml = await parseDataToHtml(html);
+            preview.appendChild(parsedHtml);
         }
 
         function refreshPreview()
@@ -66,22 +74,38 @@
             window.opener.postMessage(refreshRequest, refreshRequest.url);
         }
 
+        async function parseDataToHtml(data) 
+        {
+            let html = await parser.parseDataToHtml(data);
+            console.log(html);
+            console.log(html.innerHTML);
+            if (html)
+            {
+                console.log('highlighting code');
+                console.log(html);
+                html = highlightCode(html);
+            }
+            return html;
+        }
+
+        function highlightCode(html)
+        {
+            html.querySelectorAll('pre code').forEach((code) =>
+            {
+                hljs.highlightElement(code);
+            });
+            return html;
+        }
 
         function addEventListeners()
         {
-            window.addEventListener('message', (event) =>
+            window.addEventListener('message', async (event) =>
             {
                 if (event.origin === refreshRequest.url)
                 {
                     if (event.data.type === 'preview')
                     {
-                        handlePreviewState(event.data.html);
-                    }
-                }
-                {
-                    if (event.data.type === 'preview')
-                    {
-                        handlePreviewState(event.data.html);
+                        await handlePreviewState(event.data.data);
                     }
                 }
             });

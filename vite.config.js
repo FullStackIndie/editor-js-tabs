@@ -12,7 +12,7 @@ export default defineConfig(({ command, mode }) => ({
     emptyOutDir: true,
     brotliSize: false,
     manifest: true,
-    minify: 'esbuild',
+    minify: "esbuild",
     cssMinify: "esbuild",
     cssCodeSplit: true,
     sourcemap: command === "serve" ? "inline" : false,
@@ -30,12 +30,11 @@ export default defineConfig(({ command, mode }) => ({
     },
     rollupOptions: {
       input: {
-        'js/main': "src/js/main.js",
-        'js/editorjs': "src/js/editor.js",
-        'js/parser': "src/js/parser/editor-parser.js",
-        'js/editortabs': "src/js/tabs/editorjs-tabs.js",
-        'js/highlightjs': "src/js/highlight.js",
-        'css/main': "src/sass/styles.scss",
+        "js/parser": "src/js/parser/editor-parser.js",
+        "js/editorjs-tabs": "src/js/tabs/editorjs-tabs.js",
+        "js/blog-write": "src/js/blog-write.js",
+        "css/main": "src/sass/styles.scss",
+        "css/parser": "src/js/parser/parser.css",
       },
       output: {
         format: "es",

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EditorJS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" lang="scss" href="../src/sass/styles.scss">
+</head>
+
+<body style="width: 100%;height:100%">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <br>
+                <!-- Sticky Sidebar -->
+                <div class="sticky-container">
+                    <button type="button" class="btn btn-dark" data-toggle="collapse"
+                        data-target="#sticky-collapse">&gt;</button>
+                    <ul class="sticky collapse" id="sticky-collapse">
+                        <li>
+                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                                data-target="#restore-data-modal">Restore
+                                Backup</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12">
+                <!-- End Sticky Sidebar -->
+                <div id="data-diff">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row">
+                                <button type="button" class="btn btn-dark mx-1" id="previous-backup">&lt;&lt;</button>
+                                <button type="button" class="btn btn-dark mx-3" id="next-backup"
+                                    disabled>&gt;&gt;</button>
+                                <h2>Selected Backup
+                                    <span class="badge badge-warning" id="current-backup"></span>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h2>Latest Saved Data</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="diff1" class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                        </div>
+                        <div id="diff2" class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Restore Data Modal -->
+    <div class="modal fade" id="restore-data-modal" tabindex="-1" role="dialog" aria-labelledby="restore-data-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="restore-data-title">Restore Backup</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Do you want to restore the Blog to the selected backup?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="restore-data">Restore Selected Backup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Restore Data Modal -->
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+
+<script async type="module">
+    import Parser from '../src/js/parser/parser2html.js';
+    import { useHighlightJS } from '../src/js/highlight.js';
+
+    const hljs = await useHighlightJS();
+    const parser = new Parser();
+
+    const restoreGetRequest = {
+        type: 'restore-get',
+        url: 'http://localhost:5173',
+        requestId: null,
+    };
+
+    const restorePostRequest = {
+        type: 'restore-post',
+        url: 'http://localhost:5173',
+        requestId: null,
+    };
+
+    const state = {
+        backupData: null,
+        latestData: null,
+        backupIds: null,
+        currentBackupId: null
+    };
+
+    addEventListeners();
+
+
+    async function handleLoadState()
+    {
+        let diff1 = await getParsedData(state.backupData);
+        let diff2 = await getParsedData(state.latestData);
+        let dataDiff1 = document.getElementById('diff1');
+        let dataDiff2 = document.getElementById('diff2');
+        dataDiff1.innerHTML = "";
+        dataDiff2.innerHTML = "";
+        dataDiff1.insertAdjacentHTML('beforeend', diff1.innerHTML);
+        dataDiff2.insertAdjacentHTML('beforeend', diff2.innerHTML);
+    }
+
+    async function getParsedData(data)
+    {
+        return await parser.parseDataToHtml(data).then((html) =>
+        {
+            html.querySelectorAll('pre code').forEach(code =>
+            {
+                hljs.highlightElement(code);
+            });
+            return html;
+        }).catch((error) =>
+        {
+            console.log("Parsing Error: ", error);
+        });
+    }
+
+    function restoreBackupData()
+    {
+        restorePostRequest.requestId = state.currentBackupId;
+        window.opener.postMessage(restorePostRequest, restorePostRequest.url);
+        $('#restore-data-modal').modal('hide');
+        window.close();
+    }
+
+    async function updateBackupData()
+    {
+        let diff1 = await getParsedData(state.backupData);
+        let dataDiff1 = document.getElementById('diff1');
+        dataDiff1.innerHTML = "";
+        dataDiff1.insertAdjacentHTML('beforeend', diff1.innerHTML);
+    }
+
+    function nextBackup()
+    {
+        let nextBackupBtn = document.getElementById('next-backup');
+        let previousBackupBtn = document.getElementById('previous-backup');
+        let index = state.backupIds.indexOf(state.currentBackupId);
+        if (index >= state.backupIds.length - 1)
+        {
+            nextBackupBtn.disabled = true;
+        } else
+        {
+            updateCurrentBackupStatus(index + 1);
+            previousBackupBtn.disabled = false;
+            nextBackupBtn.disabled = false;
+            restoreGetRequest.requestId = state.backupIds[index + 1];
+            getBackupData();
+        }
+    }
+
+    function previousBackup()
+    {
+        let previousBackupBtn = document.getElementById('previous-backup');
+        let nextBackupBtn = document.getElementById('next-backup');
+        let index = state.backupIds.indexOf(state.currentBackupId);
+        if (index <= 0)
+        {
+            previousBackupBtn.disabled = true;
+        } else
+        {
+            updateCurrentBackupStatus(index - 1);
+            nextBackupBtn.disabled = false;
+            previousBackupBtn.disabled = false;
+            restoreGetRequest.requestId = state.backupIds[index - 1];
+            getBackupData();
+        }
+    }
+
+
+    function updateCurrentBackupStatus(index)
+    {
+        if (index <= 0)
+        {
+            index = 0;
+        }
+        let currentBackupNumber = document.getElementById('current-backup');
+        currentBackupNumber.innerHTML = `${index + 1} of ${state.backupIds.length}`;
+    }
+
+    function getBackupData()
+    {
+        window.opener.postMessage(restoreGetRequest, restoreGetRequest.url);
+    }
+
+    function addEventListeners()
+    {
+        window.addEventListener('message', async (event) =>
+        {
+            if (event.origin === restorePostRequest.url)
+            {
+                if (event.data.type === 'restore-post')
+                {
+                    state.currentBackupId = event.data.backupData.id;
+                    state.backupData = event.data.backupData;
+                    state.backupIds = state.backupIds || event.data.backupIds;
+                    updateCurrentBackupStatus(state.backupIds.indexOf(state.currentBackupId));
+                    if (event.data.latestData === undefined || event.data.latestData === null)
+                    {
+                        updateBackupData();
+                        return;
+                    }
+                    state.latestData = event.data.latestData;
+                    await handleLoadState();
+                }
+            }
+        });
+        document.getElementById('restore-data').onclick = restoreBackupData;
+        document.getElementById('next-backup').onclick = nextBackup;
+        document.getElementById('previous-backup').onclick = previousBackup;
+    }
+</script>
+
+</html>

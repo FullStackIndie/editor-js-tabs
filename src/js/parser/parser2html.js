@@ -4,17 +4,18 @@ import Handlebars from "handlebars";
 import HandlebarHelpers from "./handlebar-helpers";
 import TabsSettings from "../tabs/tabs-settings";
 
-export default class Parser {
+export default class Parser2HTML {
   constructor(config) {
     this.handlebars = Handlebars;
     this.handlebarHelpers = new HandlebarHelpers();
     this.template = null;
     this.settings = new TabsSettings();
     this.config = config || this.config;
+    this.html = null;
   }
 
   config = {
-    path: "templates/bs4.html?raw",
+    path: "bs4.html?raw",
   };
 
   blockTypes = [
@@ -71,34 +72,34 @@ export default class Parser {
     this.handlebars.registerHelper("ifCond", this.handlebarHelpers.ifCondition);
   }
 
-  async parseDataToHtml(data) {
+  async initializeParser() {
     this.registerHandlebarHelpers();
     let base = import.meta.env.BASE_URL;
     if (import.meta.env.MODE === "development") {
       base = "http://localhost:5173/templates";
     }
     this.template = await this.loadTemplate(`${base}/${this.config.path}`);
-    let html = document.createElement("div");
+    this.html = document.createElement("div");
+    this.html.classList.add("container-fluid");
+  }
+
+  async parseDataToHtml(data) {
+    await this.initializeParser();
     if (data.hasOwnProperty("blocks")) {
       for (let i = 0; i < data.blocks.length; i++) {
         // console.log(
         //   `found ${obj.blocks[i].type} element ${JSON.stringify(obj.blocks[i])}`
         // );
-        html.classList.add("container-fluid");
-        html.insertAdjacentHTML(
+        this.html.insertAdjacentHTML(
           "beforeend",
           await this.handleTypes(data.blocks[i])
         );
       }
     } else {
-      html.insertAdjacentHTML("beforeend", await this.handleTypes(data));
+      this.html.insertAdjacentHTML("beforeend", await this.handleTypes(data));
     }
-    return html;
+    return this.html;
   }
-
-  async parseBackupsToHtml(data) {}
-
-  async parseCacheToHtml(data) {}
 
   async loadFile(url) {
     try {
@@ -282,6 +283,9 @@ export default class Parser {
     let tabsTemplateString = this.loadElementAsString("#tabs");
     let unEscapedTabsTemplate = unescape(tabsTemplateString);
     let tabCompiled = this.handlebars.compile(unEscapedTabsTemplate);
+    elem.data.forEach((tab) => {
+      tab.pre = Math.floor(Math.random() * 1000);
+    });
     let tabHtml = tabCompiled({ data: elem.data });
     let handledImageHtml = this.handleImageUrls(tabHtml);
     return handledImageHtml;

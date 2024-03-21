@@ -32,8 +32,7 @@
               <button type="button" class="btn btn-info" id="copy-json">Copy Json</button>
             </li>
             <li>
-              <button type="button" class="btn btn-primary" data-toggle="modal"
-                data-target="#restore-data-modal">Restore Data</button>
+              <button type="button" class="btn btn-primary" id="restore-data">Restore Data</button>
             </li>
             <li>
               <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-data-modal">
@@ -65,28 +64,6 @@
           </div>
         </div>
         <!-- End Delete Modal -->
-        <!-- Restore Data Modal -->
-        <div class="modal fade" id="restore-data-modal" tabindex="-1" role="dialog" aria-labelledby="restore-data-label"
-          aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="restore-data-title">Restore Backup</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                Do you want to restore the Blog to the most recent backup?
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="restore-data">Restore Lastest Backup</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Restore Data Modal -->
         <!-- Paste History Modal -->
         <div class="modal fade" id="paste-json-modal" tabindex="-1" role="dialog" aria-labelledby="paste-json-label"
           aria-hidden="true">
@@ -114,8 +91,6 @@
           </div>
         </div>
         <!-- End Paste History Modal -->
-        <div id="history-cache"></div>
-        <div id="preview"></div>
       </div>
     </div>
   </div>
@@ -131,56 +106,41 @@
   <script async type="module">
     import * as blog from './src/js/blog-write.js';
 
-
-    let cacheKey = window.location.pathname;
-    let data = await blog.loadSavedData(cacheKey);
-
+    let data = await blog.loadSavedData();
     const editor = blog.initEditorJS(data);
-    const hljs = await blog.initHighlightJS();
-    blog.parser.config.path = 'bs4.html?raw';
 
     let saved = false;
     let previewIsActive = false;
-    let previewWindow = null;
+    let lastKeyPressTime = null;
+    let backupSaved = false;
 
-    const previewRequest = {
-      type: 'preview',
-      url: 'http://localhost:5173',
-      html: ''
-    };
 
     addEventListeners();
-    setInterval(saveBackup, 30_000);
+    setInterval(handleBackup, 10_000);
+
+    function handleBackup()
+    {
+      if (lastKeyPressTime && Date.now() - lastKeyPressTime >= 15_000)
+      {
+        if (!backupSaved)
+        {
+          saveBackup();
+          backupSaved = true;
+        }
+      } else
+      {
+        backupSaved = false;
+      }
+    }
 
     async function launchWindow()
     {
-      if (previewWindow === null || previewWindow.closed)
-      {
-        previewWindow = window.open('http://localhost:5173/sites/preview.html', '_blank', 'popup=yes,left=500,height=670,width=750,scrollbars=yes');
-        let lastSave = await blog.loadSavedData(cacheKey);
-        let html = await blog.getParsedData(lastSave);
-        previewWindow.document.querySelector('#preview').innerHTML = html.innerHTML;
-      } else
-      {
-        previewWindow.focus();
-      }
+      await blog.launchPreviewWindow();
     }
 
     function closeWindow()
     {
-      if (previewWindow)
-      {
-        previewWindow.close();
-      }
-    }
-
-    function updateWindowPreview(html)
-    {
-      if (previewWindow)
-      {
-        previewRequest.html = html.innerHTML;
-        previewWindow.postMessage(previewRequest, previewRequest.url);
-      }
+      blog.closePreviewWindow();
     }
 
     async function handlePreviewState()
@@ -204,34 +164,13 @@
 
     async function previewData()
     {
-      await blog.previewData(editor).then((html) =>
-      {
-        // html.querySelectorAll('pre code').forEach((code) =>
-        // {
-        //   hljs.highlightBlock(code);
-        // });
-        updateWindowPreview(html);
-      }).catch((error) =>
-      {
-        console.log("Preview Error: ", error);
-      });
+      await blog.previewData();
     }
 
     function saveBackup()
     {
-
-      editor.save().then(async (data) =>
-      {
-        await blog.saveBackup(data, cacheKey).catch((error) =>
-        {
-          console.log("Backup Error: ", error);
-        });
-      }).catch((error) =>
-      {
-        console.log("Saving failed: ", error);
-      });
+      blog.saveBackup();
     }
-
 
     function clearData()  
     {
@@ -239,42 +178,25 @@
       $('#delete-data-modal').modal('hide');
     }
 
-
     async function restoreData()
     {
-      data = await blog.loadBackup(cacheKey).catch((error) =>
-      {
-        console.log("Backup Error: ", error);
-      });
-
-      editor
-        .render(data)
-        .catch((error) =>
-        {
-          console.log("Saving failed: ", error);
-        });
-      $('#restore-data-modal').modal('hide');
+      await blog.restoreData();
     }
 
+    async function handleRestoreState(data)
+    {
+      await blog.handleRestoreState(data);
+    }
+
+    async function handleUpdateState(data)
+    {
+      await blog.handleUpdateState(data);
+    }
 
     function pasteJson()
     {
-      let json = document.getElementById('paste-json-input').value;
-      if (!blog.isJson(json))
-      {
-        alert("Invalid Json");
-        return;
-      }
-      $('#paste-json-modal').modal('hide');
-      let data = JSON.parse(json);
-      editor
-        .render(data)
-        .catch((error) =>
-        {
-          alert("Loading JSON failed: ", error);
-        });
+      blog.pasteJson("paste-json-input", "#paste-json-modal");
     }
-
 
     function addEventListeners()
     {
@@ -290,59 +212,40 @@
 
     async function savedDataToJsonClipboardAsync()
     {
-      try
-      {
-        let savedData = await blog.loadSavedData(cacheKey);
-        if (!savedData)
-        {
-          alert("Error: No data to copy to json");
-          return;
-        }
-        let json = JSON.stringify(savedData);
-        await navigator.clipboard.writeText(json);
-      } catch (error)
-      {
-        console.error("Error copying text:", error);
-      }
+      await blog.savedDataToJsonClipboardAsync();
     }
 
     async function getDataFromClipboardAsync()
     {
-      navigator.clipboard.readText()
-        .then(text =>
-        {
-          if (!blog.isJson(text))
-          {
-            alert("Invalid Json");
-            return;
-          }
-          let data = JSON.parse(text);
-          editor
-            .render(data)
-            .catch((error) =>
-            {
-              alert("Loading JSON failed: ", error);
-            });
-        })
-        .catch(err =>
-        {
-          console.error('Failed to read clipboard contents: ', err);
-        });
+      await blog.getDataFromClipboardAsync();
     }
-
 
     function addSavedDataEvent()
     {
       window.addEventListener('message', (event) =>
       {
-        if (event.origin === previewRequest.url)
+        if (event.origin === blog.previewRequest.url)
         {
           if (event.data.type === 'refresh')
           {
             previewData();
           }
+          if (event.data.type === 'restore-get')
+          {
+            handleUpdateState(event.data);
+          }
+          if (event.data.type === 'restore-post')
+          {
+            handleRestoreState(event.data);
+          }
         }
       });
+
+      document.addEventListener('keydown', function (event)
+      {
+        lastKeyPressTime = Date.now();
+      });
+
       document.getElementById('preview-btn').onclick = async () => await handlePreviewState();
       document.getElementById('delete-data-permanent').onclick = clearData;
       document.getElementById('restore-data').onclick = restoreData;

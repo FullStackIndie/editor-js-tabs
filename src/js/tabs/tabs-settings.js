@@ -193,7 +193,7 @@ export default class TabsSettings {
     { name: "OpenCL", code: "opencl" },
     { name: "Oz", code: "oz" },
     { name: "PARI/GP", code: "parigp" },
-    { name: "Parser", code: "parser" },
+    { name: "Parser2HTML", code: "parser" },
     { name: "Pascal", code: "pascal" },
     { name: "Pascaligo", code: "pascaligo" },
     { name: "PC-Axis", code: "pcaxis" },

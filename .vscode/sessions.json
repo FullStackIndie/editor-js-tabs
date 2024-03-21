@@ -1,0 +1,47 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v10/terminal-keeper.json",
+  "theme": "tribe",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      {
+        "name": "vite dev",
+        "icon": "triangle-down",
+        "color": "terminal.ansiYellow",
+        "autoExecuteCommands": true,
+        "focus": true,
+        "commands": [
+          "npx vite"
+        ]
+      },
+      {
+        "name": "vite build",
+        "icon": "triangle-down",
+        "color": "terminal.ansiBrightMagenta",
+        "autoExecuteCommands": false,
+        "commands": [
+          "npx vite build --base=/blog"
+        ]
+      },
+      {
+        "name": "frpc",
+        "icon": "server-environment",
+        "color": "terminal.ansiBrightRed",
+        "autoExecuteCommands": false,
+        "joinOperator": "&&",
+        "commands": [
+          "cd /c/Users/johnm/source/workspace/frp_0.47.0_windows_amd64",
+          "./frpc.exe"
+        ]
+      },
+      {
+        "name": "bash",
+        "autoExecuteCommands": false,
+        "icon": "terminal-bash",
+        "color": "terminal.ansiGreen"
+      }
+    ]
+  }
+}

@@ -33,6 +33,14 @@ export default class Backups {
       .last();
   }
 
+  async getBackupById(id) {
+    return await this.dbTable.get(id);
+  }
+
+  async getAllBackupIds() {
+    return await this.dbTable.toCollection().primaryKeys();
+  }
+  
   async pruneBackup(cacheKey) {
     const count = await this.dbTable.count();
     if (count > 50) {

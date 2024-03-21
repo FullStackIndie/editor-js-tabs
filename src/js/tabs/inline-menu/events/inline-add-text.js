@@ -11,7 +11,9 @@ export default class InlineAddText {
   }
 
   static onDeleteEvent(event) {
-    console.log("Text Deleted");
+    if (event.target) {
+      console.log("Text Deleted");
+    }
   }
 
   eventHandler(elem, selector) {
