@@ -12,7 +12,7 @@ export default class TabsSettings {
       data: [
         {
           type: "text",
-          content: `Edit`,
+          content: ``,
           index: 0,
         },
       ],
@@ -22,7 +22,7 @@ export default class TabsSettings {
       data: [
         {
           type: "text",
-          content: `Edit`,
+          content: ``,
           index: 0,
         },
       ],
@@ -83,7 +83,7 @@ export default class TabsSettings {
     { name: "Batch", code: "batch" },
     { name: "BBcode", code: "bbcode" },
     { name: "Bison", code: "bison" },
-    { name: "Backus–Naur form", code: "bnf" },
+    { name: "Backus-Naur form", code: "bnf" },
     { name: "Brainfuck", code: "brainfuck" },
     { name: "BrightScript", code: "brightscript" },
     { name: "Bro", code: "bro" },
@@ -104,7 +104,7 @@ export default class TabsSettings {
     { name: "Diff", code: "diff" },
     { name: "DNS zone file", code: "dns-zone-file" },
     { name: "Docker", code: "docker" },
-    { name: "Extended Backus–Naur form", code: "ebnf" },
+    { name: "Extended Backus-Naur form", code: "ebnf" },
     { name: "Eiffel", code: "eiffel" },
     { name: "EJS", code: "ejs" },
     { name: "Elixir", code: "elixir" },

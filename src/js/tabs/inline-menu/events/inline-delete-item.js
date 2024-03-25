@@ -13,6 +13,10 @@ export default class InlineDeleteItem {
     return deleteSvgIcon();
   }
 
+  static get isDeleteClass() {
+    return true;
+  }
+
   static onDeleteEvent(event) {
     if (event.target) {
       event.target.remove();
@@ -22,23 +26,29 @@ export default class InlineDeleteItem {
   eventHandler(elem, selector) {
     elem.addEventListener("click", (e) => {
       let dataItem = e.target.closest(selector);
-      this.handleDataItemTypes(dataItem);
+      let callbacks = this.getDeleteCallbacks();
+      this.handleDeleteCallbacks(dataItem, callbacks.deleteCallbackClasses);
+      this.handleDeleteClassEvent(dataItem, callbacks.deleteClass);
     });
   }
 
   getDeleteCallbacks() {
     let deleteCallbackClasses = [];
+    let deleteClass = null;
     this.inlineMenuConfig.config.forEach((item) => {
       if (item.class.onDeleteEvent !== undefined) {
-        deleteCallbackClasses.push(item.class);
+        if (item.class.isDeleteClass === true) {
+          deleteClass = item.class;
+        } else {
+          deleteCallbackClasses.push(item.class);
+        }
       }
     });
-    return deleteCallbackClasses;
+    return { deleteCallbackClasses, deleteClass };
   }
 
-  handleDataItemTypes(dataItem) {
-    let deleteCallbackClasses = this.getDeleteCallbacks();
-    deleteCallbackClasses.forEach((callback) => {
+  handleDeleteCallbacks(dataItem, callbacks) {
+    callbacks.forEach((callback) => {
       let key = callback.attribute.itemKey;
       if (key === "" || key === undefined || key === null) {
         return;
@@ -51,5 +61,19 @@ export default class InlineDeleteItem {
         callback.onDeleteEvent(event);
       }
     });
+  }
+
+  handleDeleteClassEvent(dataItem, deleteClass) {
+    let key = deleteClass.attribute.itemKey;
+    if (key === "" || key === undefined || key === null) {
+      return;
+    }
+    let itemType = dataItem.querySelector(`[${key}]`);
+    if (itemType !== null) {
+      let event = {
+        target: dataItem,
+      };
+      deleteClass.onDeleteEvent(event);
+    }
   }
 }

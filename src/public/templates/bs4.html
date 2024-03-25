@@ -37,6 +37,22 @@
     <pre><code class="language-{{data.languageCode}}">{{data.code}}</code></pre>
 </template>
 
+<template id="embed-youtube">
+<iframe width="560" height="315" src="{{data.url}}"
+    title="YouTube video player" frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</template>
+
+
+
+<template id="embed">
+<div style="width:100%;height:0;padding-bottom:100%;position:relative;"><iframe
+        src="https://giphy.com/embed/ehxq3SFXUxvtK2qDFs" width="100%" height="100%" style="position:absolute"
+        frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div>
+<p><a href="https://giphy.com/gifs/happy-dinosally-dino-ehxq3SFXUxvtK2qDFs">via GIPHY</a></p>
+</template>
+
 <template id="checklist">
     <ul>
         {{#each data.items}}

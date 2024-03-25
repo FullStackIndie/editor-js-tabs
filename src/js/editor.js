@@ -1,13 +1,14 @@
 import EditorJS from "@editorjs/editorjs";
 import { editorConfig } from "./editor-config";
-import Save from "./backup/save";
+import EventManager from "./tabs/events/event-manager";
 
 // import { alignTuneOnLoad } from "./tunes/align-tune/align-tune";
 
 export default class EditorJSInstance {
   constructor() {
-    this.save = new Save();
+    this.editor = null;
   }
+
   initEditorJS(data) {
     const editor = new EditorJS({
       holder: "editorjs",
@@ -15,14 +16,10 @@ export default class EditorJSInstance {
       onChange: async (api, event) => {
         let editorSavedData = api.saver.save();
         editorSavedData.then(async (data) => {
-          if (
-            data.cacheKey === undefined ||
-            data.cacheKey === null ||
-            data.cacheKey === ""
-          ) {
-            data.cacheKey = window.location.pathname;
+          EventManager.raiseEvent("editor-save-data", data);
+          if (event.type === "block-removed" || event.type === "block-added") {
+            EventManager.raiseEvent("editor-block-change", data);
           }
-          this.save.saveData(data);
         });
       },
       onReady: () => {
@@ -36,6 +33,7 @@ export default class EditorJSInstance {
       },
       ...editorConfig,
     });
+    this.editor = editor;
     return editor;
   }
 }

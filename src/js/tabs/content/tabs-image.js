@@ -15,18 +15,18 @@ export default class TabsImage {
     return imageContent;
   }
 
-  renderUploadedImage(data) {
-    let tabContentParent = document.querySelector(
-      ".tab-content > .show.active"
-    );
-    let tabId = tabContentParent.getAttribute("id");
-    let tabContent = document.getElementById(tabId);
-
+  renderUploadedImageToTabContent(data, parent) {
     let imageContent = this.renderImageContent(data);
     this.addImageCaptionEventHandlers(imageContent);
 
-    tabContent.appendChild(imageContent);
-    return tabContent;
+    parent.parentNode.insertBefore(imageContent, parent.nextSibling);
+  }
+
+  renderUploadedImageToTabParent(data, parent) {
+    let imageContent = this.renderImageContent(data);
+    this.addImageCaptionEventHandlers(imageContent);
+
+    parent.appendChild(imageContent);
   }
 
   addImageCaptionEventHandlers(parent) {
@@ -49,6 +49,8 @@ export default class TabsImage {
   }
 
   renderImage(data) {
+    data.caption = data.caption || "";
+
     let figureWrapper = document.createElement("div");
     figureWrapper.classList.add("mx-auto", "d-block");
 
@@ -80,7 +82,7 @@ export default class TabsImage {
     captionInput.setAttribute("aria-describedby", "imageLabel");
     captionInput.setAttribute("data-tab-img-caption", "");
     captionInput.value = data.caption;
-    
+
     figure.appendChild(image);
     figure.appendChild(figCaption);
     figure.appendChild(captionInput);
@@ -89,22 +91,40 @@ export default class TabsImage {
     return figureWrapper;
   }
 
-  createImageEventButton() {
+  createImageTabParentEventButton(parent) {
     const imageInput = document.createElement("input");
     imageInput.type = "file";
     imageInput.accept = "image/*";
     imageInput.addEventListener("change", (event) => {
       this.addImagePromise(event.target.files[0])
         .then((data) => {
-          console.log(data);
-          return this.renderUploadedImage(data.file);
+          if (data.file !== undefined || data.file !== null) {
+            this.renderUploadedImageToTabParent(data.file, parent);
+          }
         })
         .catch((error) => {
           console.error(error);
         });
     });
-    let image = imageInput.click();
-    return image;
+    imageInput.click();
+  }
+
+  createImageTabContentEventButton(parent) {
+    const imageInput = document.createElement("input");
+    imageInput.type = "file";
+    imageInput.accept = "image/*";
+    imageInput.addEventListener("change", (event) => {
+      this.addImagePromise(event.target.files[0])
+        .then((data) => {
+          if (data.file !== undefined || data.file !== null) {
+            this.renderUploadedImageToTabContent(data.file, parent);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+    imageInput.click();
   }
 
   addImagePromise(file) {
@@ -123,12 +143,9 @@ export default class TabsImage {
           return response.json();
         })
         .then((data) => {
-          // Handle the successful response
-          console.log("Success:", data);
           resolve(data);
         })
         .catch((error) => {
-          // Handle errors
           console.error("Error:", error);
           reject(error);
         });

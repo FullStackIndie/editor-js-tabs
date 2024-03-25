@@ -26,6 +26,7 @@ export default class Parser2HTML {
     "code",
     "codeBlock",
     "delimiter",
+    "embedCustom",
     "image",
     "raw",
     "table",
@@ -143,6 +144,28 @@ export default class Parser2HTML {
     let warningCompiled = this.handlebars.compile(warniningTemplateString);
     let warningHtml = warningCompiled(elem);
     return warningHtml;
+  }
+
+  parseEmbed(elem) {
+    
+  }
+
+  handleEmbedTypes(){
+    embedKeywords = [
+      "youtu.be",
+      "twitter",
+      "instagram",
+      "vimeo",
+      "giphy",
+      "imgur",
+      "codepen",
+      "github",
+    ];
+
+    switch(embedKeywords){
+      case "youtu.be":
+        
+    }
   }
 
   parseDelimiter(elem) {

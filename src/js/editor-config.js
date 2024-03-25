@@ -2,7 +2,6 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import CodeBlock from "./code-block/code-block";
 import Paragraph from "@editorjs/paragraph";
-import Embed from "@editorjs/embed";
 import Table from "@editorjs/table";
 import Checklist from "@editorjs/checklist";
 import Marker from "@editorjs/marker";
@@ -15,7 +14,7 @@ import ImageTool from "@editorjs/image";
 import LinkTool from "@editorjs/link";
 import NestedList from "@editorjs/nested-list";
 import Tabs from "./tabs/editorjs-tabs";
-import EmbedCustom from "./embed/embed";
+import Embed from "./embed/embed";
 import Alert from "editorjs-alert";
 import AlignTune from "./tunes/align-tune/align-tune";
 
@@ -92,18 +91,6 @@ export const editorConfig = {
     embed: {
       class: Embed,
       config: {
-        services: {
-          youtube: true,
-          instagram: true,
-          vimeo: true,
-          github: true,
-          imgur: true,
-        },
-      },
-    },
-    embedCustom: {
-      class: EmbedCustom,
-      config: {
         useTune: true,
       },
     },
@@ -129,6 +116,9 @@ export const editorConfig = {
     tabs: {
       class: Tabs,
       inlineToolbar: true,
+      config:{
+        initialTabs: 2,
+      }
     },
   },
 };

@@ -2,6 +2,7 @@ import startsWith from "lodash-es/startsWith";
 
 export default class EmbedHandler {
   constructor() {
+    this.parser = new DOMParser();
     this.embedKeywords = [
       "youtu.be",
       "twitter",
@@ -14,213 +15,162 @@ export default class EmbedHandler {
     ];
   }
 
-  getEmbeddedContent(html, elem) {
-    let embedType = this.detectEmbedType(html, elem);
-    if (embedType) {
-      if (embedType.type === "embed") {
-        return this.handleEmbededType(embedType.keyword, elem);
-      } else if (embedType.type === "url") {
-        return this.handleEmbededUrl(embedType.keyword, html, elem);
-      } else {
-        return elem;
-      }
-    }
-  }
-
-  detectEmbedType(html, elem) {
-    for (let i = 0; i < this.embedKeywords.length; i++) {
-      if (this.detectIfUrl(html)) {
-        if (html.includes(this.embedKeywords[i])) {
-          console.log(`found url ${html}`);
-          return { type: "url", keyword: this.embedKeywords[i] };
-        }
-        continue;
-      } else if (this.getSrcUrl(this.embedKeywords[i], elem)) {
-        return { type: "embed", keyword: this.embedKeywords[i] };
-      }
-    }
-    return { type: "none" };
-  }
-
-  detectIfUrl(html) {
-    if (startsWith(html, "http")) {
-      return true;
-    }
-    return false;
-  }
-
-  getSrcUrl(keyword, elem) {
-    var elements = elem.querySelectorAll(`[src], [href]`);
-    if (elements.length > 0) {
-      for (let i = 0; i < elements.length; i++) {
-        if (this.isValidUrl(elements[i], keyword)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  isValidUrl(elem, keyword) {
-    if (keyword === "youtu.be") {
-      keyword = "youtube";
-    }
-    if (elem.hasAttribute("src")) {
-      let src = elem.getAttribute("src");
-      if (src.includes(keyword)) {
-        return true;
-      }
-    } else if (elem.hasAttribute("href")) {
-      let href = elem.getAttribute("href");
-      if (href.includes(keyword)) {
-        return true;
-      }
-    } else {
-      return false;
-    }
-  }
-
   cloneAttributes(target, source) {
     [...source.attributes].forEach((attr) => {
       target.setAttribute(attr.nodeName, attr.nodeValue);
     });
   }
 
-  handleEmbededType(keyword, elem) {
-    switch (keyword) {
+  handleEmbededType(data) {
+    switch (data.service) {
       case "youtu.be":
-        return this.handleYoutubeEmbed(elem);
+        return this.handleYoutubeEmbed(data);
       case "twitter":
-        return this.handleTwitterEmbed(elem);
+        return this.handleTwitterEmbed(data);
       case "instagram":
-        return this.handleInstagramEmbed(elem);
+        return this.handleInstagramEmbed(data);
       case "vimeo":
-        return this.handleVimeoEmbed(elem);
+        return this.handleVimeoEmbed(data);
       case "giphy":
-        return this.handleGiphyEmbed(elem);
+        return this.handleGiphyEmbed(data);
       case "codepen":
-        return this.handleCodepenEmbed(elem);
+        return this.handleCodepenEmbed(data);
       case "github":
-        return this.handleGithubEmbed(elem);
+        return this.handleGithubEmbed(data);
       case "imgur":
-        return this.handleImgurEmbed(elem);
+        return this.handleImgurEmbed(data);
       default:
-        return elem;
+        return data;
     }
   }
 
-  handleEmbededUrl(keyword, html, elem) {
+  handleEmbededUrl(keyword, url) {
     switch (keyword) {
       case "youtu.be":
-        return this.handleYoutubeUrl(html, elem);
+        return this.handleYoutubeUrl(url);
       case "twitter":
-        return this.handleTwitterUrl(html);
+        return this.handleTwitterUrl(url);
       case "instagram":
-        return this.handleInstagramUrl(html, elem);
+        return this.handleInstagramUrl(url);
       case "vimeo":
-        return this.handleVimeoUrl(html, elem);
+        return this.handleVimeoUrl(url);
       case "giphy":
-        return this.handleGiphyUrl(html, elem);
+        return this.handleGiphyUrl(url);
       case "codepen":
-        return this.handleCodepenUrl(html, elem);
+        return this.handleCodepenUrl(url);
       case "github":
-        return this.handleGithubUrl(html, elem);
+        return this.handleGithubUrl(url);
       case "imgur":
-        return this.handleImgurUrl(html, elem);
+        return this.handleImgurUrl(url);
       default:
-        return elem;
+        return null;
     }
   }
 
-  handleImgurEmbed(elem) {
+  createEmbedWrapper() {
+    let embedWrapper = document.createElement("div");
+    embedWrapper.setAttribute("data-embed", "");
+    return embedWrapper;
+  }
+
+  handleImgurEmbed(html) {
     console.log(`embed imgur`);
+    let embedWrapper = this.createEmbedWrapper();
     let blockquote = document.createElement("blockquote");
-    let existingQuote = elem.querySelector("blockquote");
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingQuote = doc.querySelector("blockquote");
     if (existingQuote) {
       this.cloneAttributes(blockquote, existingQuote);
-      elem.removeChild(existingQuote);
-      elem.appendChild(blockquote);
+      embedWrapper.removeChild(existingQuote);
+      embedWrapper.appendChild(blockquote);
     }
 
     let script = document.createElement("script");
-    let existingScript = elem.querySelector("script");
+    let docScript = this.parser.parseFromString(html, "text/html");
+    let existingScript = docScript.querySelector("script");
     if (existingScript) {
       this.cloneAttributes(script, existingScript);
-      elem.removeChild(existingScript);
-      elem.appendChild(script);
+      embedWrapper.removeChild(existingScript);
+      embedWrapper.appendChild(script);
     }
-    return elem;
+    return embedWrapper;
   }
 
-  handleGiphyEmbed(elem) {
-    return elem;
+  handleGiphyEmbed(html) {
+    return embedWrapper;
   }
 
-  handleVimeoEmbed(elem) {
+  handleVimeoEmbed(html) {
     let iframe = document.createElement("iframe");
-    let existingIframe = elem.querySelector("iframe");
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingIframe = doc.querySelector("iframe");
     if (existingIframe) {
       this.cloneAttributes(iframe, existingIframe);
       iframe.width = "100%";
       iframe.height = "366px";
-      elem.removeChild(existingIframe);
-      elem.appendChild(iframe);
-      elem.setAttribute("contenteditable", "false");
+      embedWrapper.removeChild(existingIframe);
+      embedWrapper.appendChild(iframe);
+      embedWrapper.setAttribute("contenteditable", "false");
     }
-    return elem;
+    return embedWrapper;
   }
 
-  handleInstagramEmbed(elem) {
+  handleInstagramEmbed(html) {
     let blockquote = document.createElement("blockquote");
-    let existingQuote = elem.querySelector("blockquote");
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingQuote = doc.querySelector("blockquote");
     if (existingQuote) {
       this.cloneAttributes(blockquote, existingQuote);
-      elem.removeChild(existingQuote);
-      elem.appendChild(blockquote);
+      embedWrapper.removeChild(existingQuote);
+      embedWrapper.appendChild(blockquote);
     }
 
     let script = document.createElement("script");
-    let existingScript = elem.querySelector("script");
+    let docScript = this.parser.parseFromString(html, "text/html");
+    let existingScript = docScript.querySelector("script");
     if (existingScript) {
       this.cloneAttributes(script, existingScript);
-      elem.removeChild(existingScript);
-      elem.appendChild(script);
+      embedWrapper.removeChild(existingScript);
+      embedWrapper.appendChild(script);
     }
-    return elem;
+    return embedWrapper;
   }
 
-  handleYoutubeEmbed(elem) {
+  handleYoutubeEmbed(data) {
     let iframe = document.createElement("iframe");
-    let existingIframe = elem.querySelector("iframe");
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingIframe = doc.querySelector("iframe");
     if (existingIframe) {
       this.cloneAttributes(iframe, existingIframe);
       iframe.width = "100%";
       iframe.height = "366px";
-      elem.removeChild(existingIframe);
-      elem.appendChild(iframe);
-      elem.setAttribute("contenteditable", "false");
+      embedWrapper.removeChild(existingIframe);
+      embedWrapper.appendChild(iframe);
+      embedWrapper.setAttribute("contenteditable", "false");
     }
-    return elem;
+    return embedWrapper;
   }
 
-  handleCodepenEmbed(elem) {
+  handleCodepenEmbed(html) {
     let iframe = document.createElement("iframe");
-    let existingIframe = elem.querySelector("iframe");
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingIframe = doc.querySelector("iframe");
     if (existingIframe) {
       this.cloneAttributes(iframe, existingIframe);
       iframe.width = "100%";
       iframe.height = "366px";
-      elem.removeChild(existingIframe);
-      elem.appendChild(iframe);
-      elem.setAttribute("contenteditable", "false");
+      embedWrapper.removeChild(existingIframe);
+      embedWrapper.appendChild(iframe);
+      embedWrapper.setAttribute("contenteditable", "false");
     }
-    return elem;
+    return embedWrapper;
   }
 
-  handleGithubEmbed(elem) {
+  handleGithubEmbed(html) {
     console.log(`embed github`);
-    console.log(elem);
-    let existingScript = elem.querySelector("script");
+    console.log(html);
+    let doc = this.parser.parseFromString(html, "text/html");
+    let existingScript = doc.querySelector("script");
     let iframe = document.createElement("iframe");
     iframe.setAttribute("width", "100%");
     iframe.setAttribute("height", "320px");
@@ -228,24 +178,24 @@ export default class EmbedHandler {
     iframe.setAttribute("allowfullscreen", "true");
     iframe.setAttribute(
       "srcdoc",
-      `<html><body>${elem.innerHTML}</body></html>`
+      `<html><body>${embedWrapper.innerHTML}</body></html>`
     );
-    elem.setAttribute("contenteditable", "false");
-    elem.removeChild(existingScript);
-    elem.appendChild(iframe);
-    return elem;
+    embedWrapper.setAttribute("contenteditable", "false");
+    embedWrapper.removeChild(existingScript);
+    embedWrapper.appendChild(iframe);
+    return embedWrapper;
   }
 
-  handleTwitterEmbed(elem) {
+  handleTwitterEmbed(html) {
     let script = document.createElement("script");
-    let existingScript = elem.querySelector("script");
+    let existingScript = doc.querySelector("script");
     if (existingScript) {
       this.cloneAttributes(script, existingScript);
-      elem.removeChild(existingScript);
-      elem.appendChild(script);
+      embedWrapper.removeChild(existingScript);
+      embedWrapper.appendChild(script);
     }
 
-    return elem;
+    return embedWrapper;
   }
 
   handleImgurUrl(html) {
@@ -272,7 +222,7 @@ export default class EmbedHandler {
     return div;
   }
 
-  handleVimeoUrl(html, elem) {
+  handleVimeoUrl(html) {
     let url = html.split(".com/");
     let id = url[1].split("/")[0];
     let iframe = document.createElement("iframe");
@@ -281,14 +231,14 @@ export default class EmbedHandler {
     iframe.setAttribute("height", "320px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
-    elem.innerHTML = "";
-    elem.setAttribute("contenteditable", "false");
-    elem.appendChild(iframe);
-    return elem;
+    embedWrapper.innerHTML = "";
+    embedWrapper.setAttribute("contenteditable", "false");
+    embedWrapper.appendChild(iframe);
+    return embedWrapper;
   }
 
-  handleYoutubeUrl(html, elem) {
-    let url = html.split(".be/");
+  handleYoutubeUrl(url) {
+    url = url.split(".be/");
     let newUrl = `https://www.youtube.com/embed/${url[1]}`;
     let iframe = document.createElement("iframe");
     iframe.setAttribute("src", newUrl);
@@ -296,10 +246,7 @@ export default class EmbedHandler {
     iframe.setAttribute("height", "320px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
-    elem.innerHTML = "";
-    elem.setAttribute("contenteditable", "false");
-    elem.appendChild(iframe);
-    return elem;
+    return iframe;
   }
 
   handleTwitterUrl(html) {
@@ -315,7 +262,7 @@ export default class EmbedHandler {
     return div;
   }
 
-  handleInstagramUrl(html, elem) {
+  handleInstagramUrl(html) {
     let url = html.split("/");
     let newUrl = `https://www.instagram.com/p/${url[4]}/embed`;
     let iframe = document.createElement("iframe");
@@ -324,13 +271,13 @@ export default class EmbedHandler {
     iframe.setAttribute("height", "320px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
-    elem.innerHTML = "";
-    elem.setAttribute("contenteditable", "false");
-    elem.appendChild(iframe);
-    return elem;
+    embedWrapper.innerHTML = "";
+    embedWrapper.setAttribute("contenteditable", "false");
+    embedWrapper.appendChild(iframe);
+    return embedWrapper;
   }
 
-  handleGiphyUrl(html, elem) {
+  handleGiphyUrl(html) {
     let url = html.split("/");
     console.log(url);
     let newUrl = `https://giphy.com/embed/${url[5]}`;
@@ -341,13 +288,13 @@ export default class EmbedHandler {
     iframe.setAttribute("height", "480px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
-    elem.innerHTML = "";
-    elem.setAttribute("contenteditable", "false");
-    elem.appendChild(iframe);
-    return elem;
+    embedWrapper.innerHTML = "";
+    embedWrapper.setAttribute("contenteditable", "false");
+    embedWrapper.appendChild(iframe);
+    return embedWrapper;
   }
 
-  handleCodepenUrl(html, elem) {
+  handleCodepenUrl(html) {
     let url = html.split("/");
     let newUrl = `https://codepen.io/${url[3]}/embed/${url[5]}`;
     let iframe = document.createElement("iframe");
@@ -356,13 +303,13 @@ export default class EmbedHandler {
     iframe.setAttribute("height", "320px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
-    elem.innerHTML = "";
-    elem.setAttribute("contenteditable", "false");
-    elem.appendChild(iframe);
-    return elem;
+    embedWrapper.innerHTML = "";
+    embedWrapper.setAttribute("contenteditable", "false");
+    embedWrapper.appendChild(iframe);
+    return embedWrapper;
   }
 
-  handleGithubUrl(html, elem) {
+  handleGithubUrl(html) {
     let url = html.split("/");
     let div = document.createElement("div");
     div.classList.add("embed");

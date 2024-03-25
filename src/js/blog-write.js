@@ -2,11 +2,13 @@ import Backups from "./backup/backups";
 import EditorJSInstance from "./editor";
 import { isJson } from "./helpers/json-helpers";
 import Save from "./backup/save";
+import EventManager from "./tabs/events/event-manager";
 
 export { isJson } from "./helpers/json-helpers";
 export const backups = new Backups();
 export const editorJS = new EditorJSInstance();
 export const save = new Save();
+
 export const previewRequest = {
   type: "preview",
   url: "http://localhost:5173",
@@ -31,6 +33,23 @@ export let diffWindow = null;
 export let editor = null;
 export const cacheKey = window.location.pathname;
 
+export function addEventListeners() {
+  EventManager.subscribe("editor-save-data", saveData.bind(this));
+  EventManager.subscribe("editor-block-change", saveBackup.bind(this));
+}
+
+export function attachRemoveEventListeners() {
+  window.addEventListener("beforeunload", async (e) => {
+    console.log("Saving backup before unload");
+    await saveBackup();
+  });
+  window.addEventListener("unload", () => {
+    EventManager.unsubscribe("editor-save-data", saveData.bind(this));
+    EventManager.unsubscribe("editor-block-change", saveBackup.bind(this));
+    editor.destroy().bind(this);
+  });
+}
+
 /**
  * Initialize the editorjs instance
  * @returns {EditorJSInstance} - The editorjs instance
@@ -41,8 +60,21 @@ export function initEditorJS(data) {
   } else if (data === null || data === "undefined") {
     data = "{}";
   }
+  addEventListeners();
+  attachRemoveEventListeners();
   editor = editorJS.initEditorJS(data);
   return editor;
+}
+
+export async function saveData(data) {
+  if (
+    data.cacheKey === undefined ||
+    data.cacheKey === null ||
+    data.cacheKey === ""
+  ) {
+    data.cacheKey = window.location.pathname;
+  }
+  await save.saveData(data);
 }
 
 export async function previewData() {
@@ -71,6 +103,7 @@ export async function loadCurrentSave() {
 }
 
 export function saveBackup() {
+  console.log("Saving backup");
   editor
     .save()
     .then(async (data) => {
@@ -102,7 +135,7 @@ export async function launchPreviewWindow() {
     previewWindow.window.onload = (event) => {
       setTimeout(() => {
         previewWindow.postMessage(previewRequest, previewRequest.url);
-      }, 150);
+      }, 300);
     };
   } else {
     previewWindow.focus();
@@ -141,7 +174,7 @@ export async function restoreData() {
     diffWindow.window.onload = () => {
       setTimeout(() => {
         diffWindow.postMessage(restorePostRequest, restorePostRequest.url);
-      }, 150);
+      }, 300);
     };
   } else {
     diffWindow.focus();

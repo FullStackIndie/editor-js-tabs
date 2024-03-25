@@ -4,11 +4,16 @@
   white-space: pre-wrap;
 }
 
-// [contenteditable="true"]:active,
-// [contenteditable="true"]:focus {
-//     // border: none;
-//     // outline: none;
-// }
+[contenteditable="true"]:empty:before {
+  content: "\00a0\00a0\00a0\00a0\00a0\00a0"; // Non-breaking space
+}
+
+[contenteditable="true"]:focus {
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  outline: none;
+  min-width: 20px;
+}
 
 textarea {
   width: 100%;
@@ -28,7 +33,6 @@ textarea {
 .bordered-tab-contents > .nav-tabs {
   margin-bottom: 0;
 }
-
 
 .nav-link {
   position: relative;

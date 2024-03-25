@@ -1,11 +1,12 @@
-import { editTabSvgIcon, deleteSvgIcon } from "./tabs-icons";
-import TabsDataItem from "./content/tabs-data-item";
-import TabsText from "./content/tabs-text";
-import TabsImage from "./content/tabs-image";
-import TabsCodeBlock from "./content/tabs-code-block";
+import { editTabSvgIcon, deleteSvgIcon } from "../tabs-icons";
+import TabsDataItem from "./tabs-data-item";
+import TabsText from "./tabs-text";
+import TabsImage from "./tabs-image";
+import TabsCodeBlock from "./tabs-code-block";
 
-export default class TabsHandler {
-  constructor() {
+export default class TabBase {
+  constructor(api) {
+    this.api = api;
     this.tabsItem = new TabsDataItem();
     this.tabsText = new TabsText();
     this.tabsImage = new TabsImage();
@@ -30,6 +31,8 @@ export default class TabsHandler {
         this.renderTabPanel(currentId, tabsData[i], isActive)
       );
     }
+    
+    this.addTabEventHandlers(tabRendererList);
     return { tabs: tabRendererList, panels: tabPanelWrapper };
   }
 
@@ -90,6 +93,83 @@ export default class TabsHandler {
       return this.tabsImage.renderImageContent(tabData);
     } else if (tabData.type === "codeBlock") {
       return this.tabsCodeBlock.renderCodeContent(tabData);
+    }
+  }
+
+  addTabEventHandlers(parent) {
+    this.addEditTabEventsOnClick(parent);
+    this.addDeleteTabEventsOnClick(parent);
+  }
+
+  addEditTabEventsOnClick(parent) {
+    const editButtons = parent.querySelectorAll("[edit-tab-id]");
+    editButtons.forEach((editButton) => {
+      editButton.removeEventListener("click", this.editTabEvent);
+      editButton.addEventListener("click", this.editTabEvent);
+      this.api.tooltip.onHover(editButton, "Edit Tab Title", {
+        placement: "top",
+      });
+    });
+  }
+
+  editTabEvent(event) {
+    let elem = event.target.closest("[edit-tab-id]");
+    let tabId = elem.getAttribute("edit-tab-id");
+    let a = document.querySelector(`#${tabId}`);
+    let isEditable = a.getAttribute("contenteditable");
+    if (isEditable === "true") {
+      a.setAttribute("contenteditable", "false");
+      elem.style.color = "#000";
+    } else {
+      a.setAttribute("contenteditable", "true");
+      elem.style.color = "#007bff";
+    }
+  }
+
+  addDeleteTabEventsOnClick(parent) {
+    const deleteButtons = parent.querySelectorAll("[delete-tab-id]");
+    deleteButtons.forEach((deleteButton) => {
+      this.api.tooltip.onHover(deleteButton, "Delete Tab (Double-Click)", {
+        placement: "top",
+      });
+      deleteButton.addEventListener("click", (e) => {
+        this.handleDeleteHighlightClick(deleteButton);
+      });
+      deleteButton.addEventListener("dblclick", (e) => {
+        let color = window
+          .getComputedStyle(deleteButton)
+          .getPropertyValue("color");
+        if (color !== "rgb(255, 0, 0)") {
+          return;
+        }
+        this.handleTabDelete(deleteButton, parent);
+      });
+    });
+  }
+
+  handleDeleteHighlightClick(elem) {
+    let color = window.getComputedStyle(elem).getPropertyValue("color");
+    if (color !== "rgb(255, 0, 0)") {
+      elem.style.color = "rgb(255, 0, 0)";
+    }
+    setTimeout(() => {
+      elem.style.color = "#000";
+    }, 500);
+  }
+
+  handleTabDelete(elem, parent) {
+    let tabId = elem.getAttribute("delete-tab-id");
+    let tab = document.getElementById(tabId);
+    let tabPanelId = tab.getAttribute("aria-controls");
+    let tabPanel = document.getElementById(tabPanelId);
+    tabPanel.remove();
+    tab.closest("li").remove();
+    let remainingTabs = parent.querySelectorAll(".nav-item");
+    if (!remainingTabs.length > 0) {
+      let blockIndex = this.api.blocks.getCurrentBlockIndex();
+      this.api.blocks.delete(blockIndex);
+    } else {
+      remainingTabs[0].querySelector("a").click();
     }
   }
 }
