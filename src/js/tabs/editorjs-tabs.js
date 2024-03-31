@@ -4,6 +4,7 @@ import { tabsSvgIcon } from "./tabs-icons";
 import { isEmpty } from "lodash-es";
 import TabsBlockMenu from "./block-menu/tabs-block-menu";
 import Sortable from "sortablejs";
+import escape from "lodash-es/escape";
 
 export default class Tabs {
   constructor({ data, api, config }) {
@@ -95,6 +96,8 @@ export default class Tabs {
         result.push(this.saveImgContent(content, currentIndex));
       } else if (content.matches("textarea[data-tab-code]")) {
         result.push(this.saveCodeBlockContent(content, currentIndex));
+      }else if (content.matches("div[data-tab-embed-wrapper]")) {
+        result.push(this.saveEmbedContent(content, currentIndex));
       }
     });
     return result;
@@ -138,6 +141,14 @@ export default class Tabs {
       (l) => l.code === selectedValue
     ).name;
     data.languageCode = selectedValue;
+    return data;
+  }
+
+  saveEmbedContent(content, currentIndex) {
+    let data = {};
+    data.type = "embed";
+    data.index = currentIndex++;
+    data.html = escape(content.innerHTML);
     return data;
   }
 

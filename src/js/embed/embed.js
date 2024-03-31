@@ -1,5 +1,4 @@
 import EmbedHandler from "./embed-handler";
-import EmbedSettings from "./embed-settings";
 import escape from "lodash-es/escape";
 import startsWith from "lodash-es/startsWith";
 import unescape from "lodash-es/unescape";
@@ -10,13 +9,14 @@ export default class Embed {
     this.api = api;
     this.config = config;
     this.handler = new EmbedHandler();
-    this.settings = new EmbedSettings();
     this.wrapper = null;
   }
 
+  defaultData = { html: "" };
+
   static get toolbox() {
     return {
-      title: "Embed",
+      title: "Embed Custom",
       icon: `
       <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 3C15 2.44772 15.4477 2 16 2C19.3137 2 22 4.68629 22 8V16C22 19.3137 19.3137 22 16 22H8C4.68629 22 2 19.3137 2 16C2 15.4477 2.44772 15 3 15C3.55228 15 4 15.4477 4 16C4 18.2091 5.79086 20 8 20H16C18.2091 20 20 18.2091 20 16V8C20 5.79086 18.2091 4 16 4C15.4477 4 15 3.55228 15 3Z" fill="#000000"/>
@@ -29,107 +29,70 @@ export default class Embed {
     this.wrapper = document.createElement("div");
     this.wrapper.classList.add("cdx-block");
 
-    if (
-      !this.data ||
-      !this.data.hasOwnProperty("html") ||
-      startsWith(this.data.html, "http")
-    ) {
-      let embed = document.createElement("div");
-      embed.setAttribute("contenteditable", "true");
-      embed.setAttribute("data-embed", "");
+    let data = this.getData();
+    let html = this.handleHtmlEntities(data);
+    let embed = this.createEmbed(html);
+    if (data.html == "") {
       embed.addEventListener("paste", this.handlePastedData.bind(this));
-      this.wrapper.appendChild(embed);
-    } else {
-      let embedWrapper = document.createElement("div");
-      embedWrapper.setAttribute("data-embed", "");
-      embedWrapper.innerHTML = this.data.html;
-      this.wrapper.appendChild(embedWrapper);
     }
+    this.wrapper.appendChild(embed);
     return this.wrapper;
   }
 
   save(blockContent) {
-    let data = { html: blockContent.innerHTML };
-    return data;
+    let embed = blockContent.querySelector("[data-embed-wrapper]");
+    if (embed == null || embed == undefined) {
+      return {
+        html: "",
+      };
+    }
+    let html = escape(embed.innerHTML);
+    return {
+      html: html,
+    };
+  }
+
+  createEmbed(html) {
+    let embed = document.createElement("div");
+    embed.setAttribute("contenteditable", "true");
+    embed.setAttribute("data-embed-wrapper", "");
+    embed.insertAdjacentHTML("afterbegin", html);
+    return embed;
   }
 
   handlePastedData(event) {
-    let pastedData = event.clipboardData || window.clipboardData;
-    let pastedText = pastedData.getData("Text");
-    let data = this.getUrl(pastedText);
-    console.log(data);
-    if (startsWith(pastedText, "http")) {
-      this.createEmbedFromUrl(pastedText, event);
-    } else if (startsWith(pastedText, "<script>")) {
-      eval(pastedText);
+    event.stopPropagation();
+    event.preventDefault();
+    let data = event.clipboardData.getData("text");
+    let html = this.handler.getEmbeddedContent(data);
+    if (html instanceof HTMLElement) {
+      event.target.insertAdjacentElement("afterbegin", html);
     } else {
-      event.target.parentNode.innerHTML = pastedText;
+      alert(
+        `Invalid Data, Embedding this url or html is not supported.  ${data}`
+      );
     }
   }
 
-  createEmbedFromUrl(url, event) {
-    let data = this.getUrl(url);
-    let embed = this.handler.handleEmbededUrl(data.service, data.url);
-    let parent = event.target.parentNode;
-    parent.innerHTML = "";
-    parent.appendChild(embed);
-    console.log(parent);
-  }
-
-  getUrl(url) {
-    let data = {};
-    this.settings.patterns.forEach((pattern) => {
-      let service = pattern.service;
-      let regex = new RegExp(pattern.pattern, "i");
-      let match = url.match(regex);
-      if (match) {
-        console.log(`Matched ${service}`);
-        data.url = unescape(url);
-        data.service = service;
-        return data;
-      }
-    });
+  getData() {
+    let data =
+      this.data === null || this.data === "undefined"
+        ? this.defaultData
+        : this.data;
+    if (data.html == null || data.html == undefined) {
+      data.html = "";
+    }
     return data;
   }
 
-  getEmbedType(elem) {
-    let patterns = this.settings.patterns;
-    for (let i = 0; i < patterns.length; i++) {
-      let url = this.getSrcUrl(patterns[i].service, elem);
-      if (url !== null && url !== undefined) {
-        return { service: patterns[i].service, url: url };
-      }
-    }
-    return null;
-  }
-
-  getSrcUrl(service, elem) {
-    var elements = elem.querySelectorAll(`[src], [href]`);
-    if (elements.length > 0) {
-      for (let i = 0; i < elements.length; i++) {
-        let validUrl = this.getValidUrl(elements[i], service);
-        if (validUrl !== null && validUrl !== undefined) {
-          console.log(`Valid URL: ${validUrl}`);
-          return validUrl;
-        }
-      }
-    }
-    return null;
-  }
-
-  getValidUrl(elem, service) {
-    if (elem.hasAttribute("src")) {
-      let src = elem.getAttribute("src");
-      if (src.includes(service)) {
-        return src;
-      }
-    } else if (elem.hasAttribute("href")) {
-      let href = elem.getAttribute("href");
-      if (href.includes(service)) {
-        return href;
-      }
+  handleHtmlEntities(data) {
+    if (startsWith(data.html, "http")) {
+      return data.html;
     } else {
-      return null;
+      let html = null;
+      html = unescape(data.html);
+      html = html.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+      return html;
     }
   }
 }

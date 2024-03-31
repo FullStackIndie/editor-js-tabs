@@ -3,6 +3,7 @@ import TabsDataItem from "./tabs-data-item";
 import TabsText from "./tabs-text";
 import TabsImage from "./tabs-image";
 import TabsCodeBlock from "./tabs-code-block";
+import TabsEmbed from "./tabs-embed";
 
 export default class TabBase {
   constructor(api) {
@@ -11,6 +12,7 @@ export default class TabBase {
     this.tabsText = new TabsText();
     this.tabsImage = new TabsImage();
     this.tabsCodeBlock = new TabsCodeBlock();
+    this.tabsEmbed = new TabsEmbed();
   }
 
   handleTabRendering(tabsData) {
@@ -93,6 +95,10 @@ export default class TabBase {
       return this.tabsImage.renderImageContent(tabData);
     } else if (tabData.type === "codeBlock") {
       return this.tabsCodeBlock.renderCodeContent(tabData);
+    }else if (tabData.type === "embed") {
+      console.log(tabData);
+      console.log(`Embed Data in tabs render`);
+      return this.tabsEmbed.renderEmbedContent(tabData);
     }
   }
 
