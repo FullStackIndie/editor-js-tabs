@@ -6,7 +6,7 @@ export default class GithubGist {
     div.setAttribute("data-embed", "");
     let iframe = document.createElement("iframe");
     iframe.setAttribute("width", "100%");
-    iframe.setAttribute("height", "320px");
+    iframe.setAttribute("height", "500px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
     iframe.setAttribute(
@@ -22,7 +22,7 @@ export default class GithubGist {
     div.setAttribute("data-url", "");
     let iframe = document.createElement("iframe");
     iframe.setAttribute("width", "100%");
-    iframe.setAttribute("height", "320px");
+    iframe.setAttribute("height", "500px");
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("allowfullscreen", "true");
     iframe.setAttribute(

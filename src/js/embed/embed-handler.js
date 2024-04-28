@@ -7,20 +7,12 @@ import Vimeo from "./embed-types/vimeo";
 import Giphy from "./embed-types/giphy";
 import Codepen from "./embed-types/codepen";
 import Imgur from "./embed-types/imgur";
+import TikTok from "./embed-types/tik-tok";
+import EmbedTypesConfig from "./embed-types/embed-types-config";
 
 export default class EmbedHandler {
   constructor() {
-    this.embedKeywords = [
-      "youtu.be",
-      "youtube",
-      "twitter",
-      "instagram",
-      "vimeo",
-      "giphy",
-      "imgur",
-      "codepen",
-      "github",
-    ];
+    this.embedKeywords = EmbedTypesConfig.embedKeywords;
   }
 
   getEmbeddedContent(html) {
@@ -101,6 +93,8 @@ export default class EmbedHandler {
         return Imgur.handleImgurEmbed(html);
       case "github":
         return GithubGist.handleGithubEmbed(html);
+      case "tiktok":
+        return TikTok.handleTikTokEmbed(html);
       default:
         return null;
     }
@@ -125,6 +119,8 @@ export default class EmbedHandler {
         return Imgur.handleImgurUrl(url);
       case "github":
         return GithubGist.handleGithubUrl(url);
+      case "tiktok":
+        return TikTok.handleTikTokUrl(url);
       default:
         return null;
     }

@@ -3,6 +3,7 @@ import unescape from "lodash-es/unescape";
 import Handlebars from "handlebars";
 import HandlebarHelpers from "./handlebar-helpers";
 import TabsSettings from "../tabs/tabs-settings";
+import EmbedHandler from "../embed/embed-handler";
 
 export default class Parser2HTML {
   constructor(config) {
@@ -12,6 +13,7 @@ export default class Parser2HTML {
     this.settings = new TabsSettings();
     this.config = config || this.config;
     this.html = null;
+    this.embedHandler = new EmbedHandler();
   }
 
   config = {
@@ -26,7 +28,7 @@ export default class Parser2HTML {
     "code",
     "codeBlock",
     "delimiter",
-    "embedCustom",
+    "embed",
     "image",
     "raw",
     "table",
@@ -64,6 +66,8 @@ export default class Parser2HTML {
         return this.parseNestedChecklist(block);
       case "alert":
         return this.parseAlert(block);
+      case "embed":
+        return this.parseEmbed(block);
       default:
         return "";
     }
@@ -71,6 +75,7 @@ export default class Parser2HTML {
 
   registerHandlebarHelpers() {
     this.handlebars.registerHelper("ifCond", this.handlebarHelpers.ifCondition);
+    this.handlebars.registerHelper("embed", this.handlebarHelpers.embed);
   }
 
   async initializeParser() {
@@ -147,25 +152,10 @@ export default class Parser2HTML {
   }
 
   parseEmbed(elem) {
-    
-  }
-
-  handleEmbedTypes(){
-    embedKeywords = [
-      "youtu.be",
-      "twitter",
-      "instagram",
-      "vimeo",
-      "giphy",
-      "imgur",
-      "codepen",
-      "github",
-    ];
-
-    switch(embedKeywords){
-      case "youtu.be":
-        
-    }
+    console.log(`embed element ${JSON.stringify(elem)}`);
+    let html = unescape(elem.data.html);
+    html = html.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    return html;
   }
 
   parseDelimiter(elem) {
@@ -318,9 +308,11 @@ export default class Parser2HTML {
     let tabTextTemplateString = this.loadElementAsString("#tab-text");
     let tabImageTemplateString = this.loadElementAsString("#tab-image");
     let tabCodeTemplateString = this.loadElementAsString("#tab-code-block");
+    let tabEmbedTemplateString = this.loadElementAsString("#tab-embed");
 
     this.handlebars.registerPartial("tab-text", tabTextTemplateString);
     this.handlebars.registerPartial("tab-image", tabImageTemplateString);
     this.handlebars.registerPartial("tab-code-block", tabCodeTemplateString);
+    this.handlebars.registerPartial("tab-embed", tabEmbedTemplateString);
   }
 }

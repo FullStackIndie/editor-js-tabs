@@ -38,19 +38,15 @@
 </template>
 
 <template id="embed-youtube">
-<iframe width="560" height="315" src="{{data.url}}"
-    title="YouTube video player" frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <iframe width="560" height="315" src="{{data.url}}" title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </template>
 
 
 
 <template id="embed">
-<div style="width:100%;height:0;padding-bottom:100%;position:relative;"><iframe
-        src="https://giphy.com/embed/ehxq3SFXUxvtK2qDFs" width="100%" height="100%" style="position:absolute"
-        frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div>
-<p><a href="https://giphy.com/gifs/happy-dinosally-dino-ehxq3SFXUxvtK2qDFs">via GIPHY</a></p>
+    <div class="container-fluid">{{{data.html}}}</div>
 </template>
 
 <template id="checklist">
@@ -129,7 +125,8 @@
             {{#each data}}
             <li class="nav-item">
                 <a class="nav-link {{this.activeClass}}" id="pre-{{this.pre}}-{{this.tabId}}" data-toggle="tab"
-                    href="#pre-{{this.pre}}-{{this.tabContentId}}" role="tab" aria-controls="pre-{{this.pre}}-{{this.tabContentId}}"
+                    href="#pre-{{this.pre}}-{{this.tabContentId}}" role="tab"
+                    aria-controls="pre-{{this.pre}}-{{this.tabContentId}}"
                     aria-selected="{{this.active}}">{{this.title}}<span class="ml-3"></span></a>
             </li>
             {{/each}}
@@ -148,6 +145,9 @@
                 {{/ifCond}}
                 {{#ifCond this.type '===' 'codeBlock'}}
                 {{> tab-code-block data=this}}
+                {{/ifCond}}
+                {{#ifCond this.type '===' 'embed'}}
+                {{embed this}}
                 {{/ifCond}}
                 {{/each}}
                 {{/with}}
@@ -172,7 +172,11 @@
 </template>
 
 <template id="tab-code-block">
-        <h4><span class="badge badge-dark">{{language}}</span></h4>
-        <pre><code class="language-{{data.languageCode}}">{{data.code}}
+    <h4><span class="badge badge-dark">{{language}}</span></h4>
+    <pre><code class="language-{{data.languageCode}}">{{data.code}}
         </code></pre>
+</template>
+
+<template id="tab-embed">
+    <div class="container-fluid">{{{data.html}}}</div>
 </template>

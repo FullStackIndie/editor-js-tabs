@@ -149,6 +149,7 @@ export default class Tabs {
     data.type = "embed";
     data.index = currentIndex++;
     data.html = escape(content.innerHTML);
+    console.log(data);
     return data;
   }
 

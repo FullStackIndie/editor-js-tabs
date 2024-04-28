@@ -1,3 +1,5 @@
+import Handlebars from "handlebars";
+
 export default class HandlebarHelpers {
   toLowercase(str) {
     return str.toLowerCase();
@@ -9,6 +11,12 @@ export default class HandlebarHelpers {
 
   equals(a, b) {
     return a === b;
+  }
+
+  embed(data){
+    console.log(data);
+    let result = data.html.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    return new Handlebars.SafeString(result);
   }
 
   /// Handlebars helper to compare two values

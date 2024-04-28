@@ -20,6 +20,7 @@ export default class TabsEmbed {
     let embedContent = document.createElement("div");
     embedContent.setAttribute("data-tab-embed-wrapper", "");
     embedContent.setAttribute("contenteditable", "true");
+    embedContent.classList.add("container-fluid");
 
     if (data.html == null || data.html == undefined) {
       data.html = "";

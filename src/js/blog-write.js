@@ -135,7 +135,7 @@ export async function launchPreviewWindow() {
     previewWindow.window.onload = (event) => {
       setTimeout(() => {
         previewWindow.postMessage(previewRequest, previewRequest.url);
-      }, 300);
+      }, 1_000);
     };
   } else {
     previewWindow.focus();
@@ -174,7 +174,7 @@ export async function restoreData() {
     diffWindow.window.onload = () => {
       setTimeout(() => {
         diffWindow.postMessage(restorePostRequest, restorePostRequest.url);
-      }, 300);
+      }, 1_000);
     };
   } else {
     diffWindow.focus();

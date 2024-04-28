@@ -4,6 +4,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "vite build --base /blog",
     "preview": "vite preview"
