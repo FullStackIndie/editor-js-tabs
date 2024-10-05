@@ -63,13 +63,21 @@ export default class AlignTune {
   }
 
   save() {
+    let blockId = this.getCurrentBlockId();
+    let elem = document.querySelector(
+      `[data-id="${blockId}"] .ce-block__content`
+    );
+    if(elem){
+      return {
+        alignment: elem.style.textAlign,
+      }
+    }
     return {
-      alignment: this.currentAlignment,
+      alignment: null,
     };
   }
 
   getCurrentBlockId() {
-    console.log(this.data);
     let index = this.api.blocks.getCurrentBlockIndex();
     let block = this.api.blocks.getBlockByIndex(index);
     let blockId = block.id;
@@ -81,6 +89,7 @@ export default class AlignTune {
       `[data-id="${blockId}"] .ce-block__content`
     );
     this.currentAlignment = align;
+    console.log(this.currentAlignment);
     elem.style.textAlign = this.currentAlignment;
   }
 }

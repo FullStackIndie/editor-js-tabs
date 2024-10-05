@@ -1,5 +1,4 @@
 import Header from "@editorjs/header";
-import List from "@editorjs/list";
 import CodeBlock from "./code-block/code-block";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
@@ -11,18 +10,21 @@ import InlineCode from "@editorjs/inline-code";
 import Underline from "@editorjs/underline";
 import Delimiter from "@editorjs/delimiter";
 import ImageTool from "@editorjs/image";
-import LinkTool from "@editorjs/link";
 import NestedList from "@editorjs/nested-list";
 import Tabs from "./tabs/editorjs-tabs";
 import Embed from "./embed/embed";
 import Alert from "editorjs-alert";
 import AlignTune from "./tunes/align-tune/align-tune";
+import TextVariantTune from "@editorjs/text-variant-tune";
 
 export const editorConfig = {
   inlineToolbar: ["link", "marker", "bold", "italic", "underline"],
   tools: {
     alignTune: {
       class: AlignTune,
+    },
+    textVariantTune: {
+      class: TextVariantTune,
     },
     paragraph: {
       class: Paragraph,
@@ -31,7 +33,7 @@ export const editorConfig = {
         preserveBlank: true,
       },
       inlineToolbar: true,
-      tunes: ["alignTune"],
+      tunes: ["alignTune", "textVariantTune"],
     },
     header: {
       class: Header,
@@ -41,9 +43,6 @@ export const editorConfig = {
       },
       shortcut: "CMD+SHIFT+H",
       tunes: ["alignTune"],
-    },
-    list: {
-      class: List,
     },
     alert: {
       class: Alert,
@@ -81,13 +80,6 @@ export const editorConfig = {
       class: Checklist,
       inlineToolbar: true,
     },
-    linkTool: {
-      class: LinkTool,
-      config: {
-        endpoint:
-          "http://localhost/phppot/jquery/editorjs/extract-link-data.php", // Your backend endpoint for url data fetching,
-      },
-    },
     embed: {
       class: Embed,
       config: {
@@ -116,9 +108,9 @@ export const editorConfig = {
     tabs: {
       class: Tabs,
       inlineToolbar: true,
-      config:{
+      config: {
         initialTabs: 2,
-      }
+      },
     },
   },
 };

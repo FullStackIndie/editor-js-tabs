@@ -4,8 +4,9 @@ import transformManifest from "./vite-plugins/transform-manifest";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
   plugins: [transformManifest],
-  base: "/",
+  base: command === "build" ? "/blog" : "/",
   publicDir: "./src/public",
+  // publicDir: "",
   // assetsInclude: ["**/*.xml", "**/*.html"],
   build: {
     outDir: "../../wwwroot/blog",
@@ -30,11 +31,12 @@ export default defineConfig(({ command, mode }) => ({
     },
     rollupOptions: {
       input: {
-        "js/parser": "src/js/parser/editor-parser.js",
+        "js/parser": "src/js/parser/liquid2html.js",
         "js/editorjs-tabs": "src/js/tabs/editorjs-tabs.js",
         "js/blog-write": "src/js/blog-write.js",
+        // "js/highlight": "src/js/highlight.js",
         "css/main": "src/sass/styles.scss",
-        "css/parser": "src/js/parser/parser.css",
+        // "css/parser": "src/js/parser/parser.css",
       },
       output: {
         format: "es",

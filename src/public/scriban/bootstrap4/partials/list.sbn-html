@@ -1,0 +1,13 @@
+{{- if data.style == 'ordered' -}}
+  <ol>
+{{~ else ~}}
+  <ul>
+{{~ end ~}}
+{{~ for item in data.items ~}}
+  <li>{{ item }}</li>
+{{~ end ~}}
+{{~ if data.style == 'ordered' ~}}
+  </ol>
+{{~ else ~}}
+  </ul>
+{{~ end ~}}

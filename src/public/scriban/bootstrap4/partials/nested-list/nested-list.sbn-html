@@ -1,0 +1,20 @@
+{{- if data.style == 'ordered' -}}
+  {{~ if data.nested ~}}
+    <ol type="a">
+  {{~ else ~}}
+    <ol>
+  {{~ end ~}}
+    {{-
+      data = { 
+      items: data.items,
+      style: data.style,
+      nested: true
+      } 
+    -}}
+  {{~ include 'nested-list-item' data ~}}
+  </ol>
+{{~ else ~}}
+  <ul>
+    {{~ include 'nested-list-item' data ~}}
+  </ul>
+{{~ end ~}}

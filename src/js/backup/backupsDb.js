@@ -13,13 +13,9 @@ class backupsDb {
   }
 
   initDatabase() {
-    this.db.version(this.oldDBVersion).stores({
-      backup: "++id, time, cacheKey",
-      save: "++id, time",
-    });
     this.db.version(this.newDBVersion).stores({
-      backup: "++id, time, cacheKey",
-      save: "++id, time, cacheKey"
+      backup: "++editorId, time, cacheKey",
+      save: "++editorId, time, cacheKey",
     });
   }
 }

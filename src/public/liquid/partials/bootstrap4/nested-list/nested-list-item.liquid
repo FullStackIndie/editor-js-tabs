@@ -1,0 +1,8 @@
+{% for item in items %}
+  <li>
+    {{ item.content }}
+    {% if item.items %}
+      {% render './nested-list-recursion', items: item.items, style: style, nested: true %}
+    {% endif %}
+  </li>
+{% endfor %}

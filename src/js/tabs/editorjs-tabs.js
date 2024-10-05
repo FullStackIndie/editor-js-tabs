@@ -88,15 +88,14 @@ export default class Tabs {
     let result = [];
     let tab = document.getElementById(id);
     let tabContent = tab.querySelectorAll(`*`);
-    let currentIndex = 0;
-    tabContent.forEach((content) => {
+    tabContent.forEach((content, currentIndex) => {
       if (content.matches("div[data-tab-text]")) {
         result.push(this.saveTextContent(content, currentIndex));
       } else if (content.matches("img[data-tab-img]")) {
         result.push(this.saveImgContent(content, currentIndex));
       } else if (content.matches("textarea[data-tab-code]")) {
         result.push(this.saveCodeBlockContent(content, currentIndex));
-      }else if (content.matches("div[data-tab-embed-wrapper]")) {
+      } else if (content.matches("div[data-tab-embed-wrapper]")) {
         result.push(this.saveEmbedContent(content, currentIndex));
       }
     });
@@ -107,14 +106,14 @@ export default class Tabs {
     let data = {};
     data.type = "text";
     data.content = content.innerHTML;
-    data.index = currentIndex++;
+    data.index = currentIndex;
     return data;
   }
 
   saveImgContent(content, currentIndex) {
     let data = {};
     data.type = "image";
-    data.index = currentIndex++;
+    data.index = currentIndex;
     data.url = content.src;
     data.width = content.width;
     data.height = content.height;
@@ -135,7 +134,9 @@ export default class Tabs {
     }
     let selectedValue = select.options[select.selectedIndex].value;
     data.type = "codeBlock";
-    data.index = currentIndex++;
+    data.index = currentIndex;
+    console.log("tabs code");
+    console.log(content.value);
     data.code = content.value;
     data.language = this.settings.languageList.find(
       (l) => l.code === selectedValue
@@ -147,7 +148,7 @@ export default class Tabs {
   saveEmbedContent(content, currentIndex) {
     let data = {};
     data.type = "embed";
-    data.index = currentIndex++;
+    data.index = currentIndex;
     data.html = escape(content.innerHTML);
     console.log(data);
     return data;

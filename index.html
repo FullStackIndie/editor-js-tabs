@@ -104,9 +104,20 @@
 
 
   <script async type="module">
-    import * as blog from './src/js/blog-write.js';
+    import BlogWrite from './src/js/blog-write.js';
+    import Dev from './src/js/dev.js';
 
+    let config = {
+      baseUrl: "http://localhost:5173",
+      previewPath: "sites/preview.html",
+      restorePath:"sites/restore-diff.html",
+      cacheKey: "local"
+    };
+
+    const dev = new Dev();
+    let blog = new BlogWrite(config);
     let data = await blog.loadSavedData();
+    console.log(data);
     const editor = blog.initEditorJS(data);
 
     let saved = false;
@@ -135,7 +146,7 @@
 
     async function launchWindow()
     {
-      await blog.launchPreviewWindow();
+      await blog.launchPreviewWindow(`${config.baseUrl}/${config.previewPath}`);
     }
 
     function closeWindow()

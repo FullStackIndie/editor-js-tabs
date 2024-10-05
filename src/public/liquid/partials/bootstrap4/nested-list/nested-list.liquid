@@ -1,0 +1,13 @@
+{% if data.style == 'ordered' %}
+  {% if nested %}
+    <ol type="a">
+  {% else %}
+    <ol>
+  {% endif %}
+  {% render './nested-list-item', items: data.items, style: data.style, nested: true %}
+  </ol>
+{% else %}
+  <ul>
+    {% render './nested-list-item', items: data.items, style: data.style %}
+  </ul>
+{% endif %}

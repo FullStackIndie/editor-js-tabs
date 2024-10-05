@@ -22,6 +22,12 @@
                         data-target="#sticky-collapse">&gt;</button>
                     <ul class="sticky collapse" id="sticky-collapse">
                         <li>
+                            <button type="button" class="btn btn-dark mx-1" id="previous-backup">&lt;&lt;</button>
+                        </li>
+                        <li>
+                            <button type="button" class="btn btn-dark mx-3" id="next-backup" disabled>&gt;&gt;</button>
+                        </li>
+                        <li>
                             <button type="button" class="btn btn-primary" data-toggle="modal"
                                 data-target="#restore-data-modal">Restore
                                 Backup</button>
@@ -32,18 +38,15 @@
             <div class="col-12">
                 <!-- End Sticky Sidebar -->
                 <div id="data-diff">
-                    <div class="row">
-                        <div class="col-6">
+                    <div class="row sticky-top">
+                        <div class="col-6 bg-white">
                             <div class="row">
-                                <button type="button" class="btn btn-dark mx-1" id="previous-backup">&lt;&lt;</button>
-                                <button type="button" class="btn btn-dark mx-3" id="next-backup"
-                                    disabled>&gt;&gt;</button>
                                 <h2>Selected Backup
                                     <span class="badge badge-warning" id="current-backup"></span>
                                 </h2>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6  bg-white">
                             <h2>Latest Saved Data</h2>
                         </div>
                     </div>
@@ -220,7 +223,8 @@
             {
                 if (event.data.type === 'restore-post')
                 {
-                    state.currentBackupId = event.data.backupData.id;
+                    console.log(event.data);
+                    state.currentBackupId = event.data.backupData.editorId;
                     state.backupData = event.data.backupData;
                     state.backupIds = state.backupIds || event.data.backupIds;
                     updateCurrentBackupStatus(state.backupIds.indexOf(state.currentBackupId));

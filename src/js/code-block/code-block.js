@@ -1,3 +1,5 @@
+// https://github.com/paraswaykole/editor-js-code/blob/master/src/index.js#L139
+
 export default class CodeBlock {
   /**
    * Allow to press Enter inside the CodeBlock textarea
@@ -266,7 +268,7 @@ export default class CodeBlock {
 
     this.data = {
       code: data.code || "",
-      languageCode: data.languageCode || "",
+      languageCode: data.languageCode || this.languageList[0].code,
     };
 
     this.nodes.holder = this.drawView();

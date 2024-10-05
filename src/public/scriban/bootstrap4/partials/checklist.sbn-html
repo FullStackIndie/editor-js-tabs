@@ -1,0 +1,19 @@
+<ul>
+    {{~ for item in data.items ~}}
+    {{~ if item.checked ~}}
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="{{ item.id }}-{{ item.text }}" checked readonly >
+        <label class="form-check-label" for="{{ item.id }}-{{ item.text }}">
+            {{- item.text -}}
+        </label>
+    </div>
+    {{~ else ~}}
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="{{ item.id }}-{{ item.text }}" readonly>
+        <label class="form-check-label" for="{{ item.id }}-{{ item.text }}">
+            {{- item.text -}}
+        </label>
+    </div>
+    {{~ end ~}}
+    {{~ end ~}}
+</ul>

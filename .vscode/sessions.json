@@ -22,7 +22,7 @@
         "color": "terminal.ansiBrightMagenta",
         "autoExecuteCommands": false,
         "commands": [
-          "npx vite build --base=/blog"
+          "npx vite build"
         ]
       },
       {
@@ -32,8 +32,8 @@
         "autoExecuteCommands": false,
         "joinOperator": "&&",
         "commands": [
-          "cd /c/Users/johnm/source/workspace/frp_0.47.0_windows_amd64",
-          "./frpc.exe"
+          "cd /c/Users/johnm/source/workspace/frp_0.59.0_windows_amd64",
+          "./frpc.exe -c ./frpc.toml"
         ]
       },
       {

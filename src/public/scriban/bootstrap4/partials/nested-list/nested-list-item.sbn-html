@@ -1,0 +1,15 @@
+{{- for item in data.items -}}
+  <li>
+    {{~ item.content ~}}
+    {{~ if item.items ~}}
+    {{-
+      data = { 
+      items: item.items,
+      style: data.style,
+      nested: true
+      } 
+    -}}
+      {{~ include 'nested-list' data ~}}
+    {{~ end ~}}
+  </li>
+{{~ end ~}}

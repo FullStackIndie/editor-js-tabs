@@ -1,0 +1,7 @@
+<div>
+  <h4>
+    <span class="badge badge-dark mt-3">{{ data.language }}</span>
+    <button class="btn btn-dark mt-3 mr-5" data-copy>Copy</button>
+  </h4>
+  <pre><code class="language-{{data.languageCode}}" data-lang="{{ data.languageCode }}">{{data.code | escape}}</code></pre>
+</div>

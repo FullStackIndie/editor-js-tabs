@@ -1,0 +1,7 @@
+{{- for row in data.content -}} 
+  <tr>
+    {{~ for column in row ~}} 
+      <td>{{~ column ~}} </td>
+    {{~ end ~}} 
+  </tr>
+{{~ end ~}} 

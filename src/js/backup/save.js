@@ -9,6 +9,7 @@ export default class Save {
   }
 
   async saveData(data) {
+    console.log(`Saved Data Cache key ${data.cacheKey}`);
     return this.db.transaction("rw", this.dbTable, async () => {
       await this.deletedSavedData(data.cacheKey);
       await this.setSavedData(data);
@@ -16,9 +17,13 @@ export default class Save {
   }
 
   async getSavedData(cacheKey) {
-    if(cacheKey === undefined || cacheKey === null || cacheKey === "") {
+    console.log(`Saved Data Cache key ${cacheKey}`);
+    if (cacheKey === undefined || cacheKey === null || cacheKey === "") {
       cacheKey = window.location.pathname;
-      console.log("No cache key provided, using window.location.pathname: ", cacheKey);
+      console.log(
+        "No cache key provided, using window.location.pathname: ",
+        cacheKey
+      );
     }
     return await this.dbTable
       .where("cacheKey")
@@ -27,6 +32,7 @@ export default class Save {
   }
 
   async setSavedData(data) {
+    console.log(`Saved Data Cache key ${data.cacheKey}`);
     await this.dbTable.put(data).catch((error) => {
       console.log("Error saving data: ", error);
     });
